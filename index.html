@@ -1,628 +1,1543 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YT Audio Player</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CineX - Video Editor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-  html, body {
-    background: #07070f;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'DM Sans', sans-serif;
-    padding: 24px;
-  }
+    :root {
+      --bg-primary: #000000;
+      --bg-surface: #585858;
+      --bg-card: #282828;
+      --bg-card-alt: rgba(0, 0, 0, 0.2);
+      --bg-overlay: rgba(0, 0, 0, 0.2);
+      --accent: #e8ff17;
+      --text-primary: #c8c8c8;
+      --text-secondary: #c9c9c9;
+      --text-dark: #000000;
+      --border-color: rgba(154, 154, 154, 0.3);
+      --progress-bg: #393939;
+      --volume-bg: #676767;
+      --aside-bg: #b9b9b9;
+      --alert-bg: rgba(113, 113, 113, 0.2);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-full: 100px;
+      --font: 'Outfit', sans-serif;
+    }
 
-  .shell {
-    width: 100%;
-    max-width: 560px;
-    background: #0d0d18;
-    border: 1px solid #1c1c30;
-    border-radius: 20px;
-    padding: 28px 24px 22px;
-  }
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: var(--font);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
 
-  .header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
+    /* ═══════════════════════════ MAIN LAYOUT ═══════════════════════════ */
+    .editor-page {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
 
-  .logo-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #6c63ff;
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .logo-dot.idle { background: #2a2a44; }
-  .logo-dot.playing { animation: blink 1.4s ease-in-out infinite; }
+    .body-wrapper {
+      display: flex;
+      flex-direction: row;
+      flex: 1;
+      overflow: hidden;
+      gap: 8px;
+      justify-content: center;
+    }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
+    .aside {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      background: var(--aside-bg);
+      overflow: hidden;
+    }
 
-  .header-label {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    color: #3a3a5e;
-    text-transform: uppercase;
-    flex: 1;
-  }
+    .canvas {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      flex: 1;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      overflow: hidden;
+    }
 
-  /* URL input */
-  .url-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-  }
+    /* ═══════════════════════════ CONTENT / PREVIEW ═══════════════════════════ */
+    .content-area {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  .url-input {
-    flex: 1;
-    background: #111122;
-    border: 1px solid #22223a;
-    border-radius: 10px;
-    padding: 10px 14px;
-    color: #c8c8e0;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    outline: none;
-    transition: border-color 0.2s;
-    min-width: 0;
-  }
-  .url-input::placeholder { color: #2e2e4a; }
-  .url-input:focus { border-color: #6c63ff; }
+    .vertical-video-preview {
+      width: min(85vw, 365px);
+      height: min(75vh, 710px);
+      max-height: 60%;
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
 
-  .load-btn {
-    background: #6c63ff;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 18px;
-    color: #fff;
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background 0.2s, transform 0.1s;
-    flex-shrink: 0;
-  }
-  .load-btn:hover { background: #8078ff; }
-  .load-btn:active { transform: scale(0.96); }
+    .alert-joining {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--alert-bg);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 14px;
+      padding: 8px 16px;
+    }
 
-  /* Waveform */
-  .wave-wrap {
-    background: #0a0a14;
-    border: 1px solid #181828;
-    border-radius: 14px;
-    padding: 0;
-    margin-bottom: 16px;
-    overflow: hidden;
-    position: relative;
-    height: 100px;
-  }
+    .alert-joining i {
+      color: var(--accent);
+      font-size: 34px;
+      animation: spin 2s linear infinite;
+    }
 
-  #waveCanvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
 
-  .wave-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
+    .alert-joining span {
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 400;
+    }
 
-  .wave-overlay span {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: #252538;
-    text-transform: uppercase;
-    transition: opacity 0.4s;
-  }
+    /* Right side floating menu */
+    .right-side-menu {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      background: var(--bg-card);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      z-index: 10;
+    }
 
-  /* Track info */
-  .track-box {
-    min-height: 44px;
-    margin-bottom: 14px;
-  }
+    .right-side-menu i {
+      font-size: 32px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+    }
 
-  .track-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: #cccce4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 3px;
-    line-height: 1.3;
-  }
+    .right-side-menu i:hover {
+      transform: scale(1.1);
+    }
 
-  .track-author {
-    font-size: 12px;
-    color: #44446a;
-    font-family: 'Space Mono', monospace;
-  }
+    .right-side-menu i.active {
+      color: var(--accent);
+    }
 
-  /* Progress */
-  .progress-bar {
-    height: 3px;
-    background: #181828;
-    border-radius: 99px;
-    cursor: pointer;
-    margin-bottom: 8px;
-    position: relative;
-    overflow: hidden;
-  }
+    /* ═══════════════════════════ EDITOR CONTROLS PANEL ═══════════════════════════ */
+    .editor-controls {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
 
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #6c63ff 0%, #a78bfa 100%);
-    border-radius: 99px;
-    transition: width 0.4s linear;
-    pointer-events: none;
-  }
+    /* ─── Player Control ─── */
+    .player-control-wrapper {
+      padding: 0 16px;
+    }
 
-  .time-row {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    color: #33334e;
-    margin-bottom: 18px;
-  }
+    .player-control {
+      background: var(--bg-overlay);
+      border-radius: var(--radius-lg);
+      padding: 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
 
-  /* Controls */
-  .controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin-bottom: 16px;
-  }
+    .progress-bar-container {
+      display: flex;
+      align-items: center;
+      width: 100%;
+    }
 
-  .ghost-btn {
-    background: none;
-    border: none;
-    color: #44446a;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.15s, background 0.15s;
-  }
-  .ghost-btn:hover { color: #9898c0; background: #181828; }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--progress-bg);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
 
-  .play-btn {
-    width: 52px; height: 52px;
-    background: #6c63ff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff;
-    transition: background 0.2s, transform 0.1s;
-    flex-shrink: 0;
-  }
-  .play-btn:hover { background: #8078ff; }
-  .play-btn:active { transform: scale(0.94); }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: var(--radius-full);
+      width: 55%;
+      transition: width 0.1s;
+    }
 
-  /* Volume */
-  .vol-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+    .info-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+    }
 
-  .vol-icon { color: #2e2e4a; flex-shrink: 0; }
+    .time-info {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text-primary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
 
-  input[type=range].vol {
-    flex: 1;
-    -webkit-appearance: none;
-    appearance: none;
-    height: 3px;
-    background: #181828;
-    border-radius: 99px;
-    outline: none;
-    cursor: pointer;
-  }
-  input[type=range].vol::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    background: #6c63ff;
-    cursor: pointer;
-    transition: transform 0.1s;
-  }
-  input[type=range].vol::-webkit-slider-thumb:hover { transform: scale(1.3); }
-  input[type=range].vol::-moz-range-thumb {
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    background: #6c63ff;
-    border: none;
-    cursor: pointer;
-  }
+    .button-icons-play {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      flex: 1;
+      border-radius: var(--radius-sm);
+      padding: 4px 0;
+    }
 
-  /* Hidden player */
-  #ytplayer {
-    position: fixed;
-    left: -9999px;
-    top: -9999px;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-</style>
+    .button-icons-play i {
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .button-icons-play i:hover {
+      transform: scale(1.15);
+    }
+
+    .button-icons-play i.play-icon { color: var(--text-primary); }
+    .button-icons-play i.pause-icon { color: var(--accent); }
+    .button-icons-play i.stop-icon { color: var(--text-primary); }
+
+    .controls-right {
+      display: flex;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    .controls-right i {
+      font-size: 28px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    /* ─── Music Section ─── */
+    .music-section-wrapper {
+      padding: 0 16px;
+    }
+
+    .music-section {
+      background: var(--bg-overlay);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .music-wave-frame {
+      height: 34px;
+      border-radius: var(--radius-sm);
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .music-wave-frame span {
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .music-row::-webkit-scrollbar { display: none; }
+
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-md);
+      padding: 0 8px;
+      height: 42px;
+      min-width: 120px;
+      flex-shrink: 0;
+    }
+
+    .volume-control i {
+      font-size: 22px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .volume-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--volume-bg);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .volume-bar-fill {
+      height: 100%;
+      width: 20%;
+      background: var(--text-primary);
+      border-radius: var(--radius-full);
+    }
+
+    .music-button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-md);
+      padding: 0 8px;
+      height: 42px;
+      min-width: 0;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.2s;
+      overflow: hidden;
+    }
+
+    .music-button:hover {
+      background: #333;
+    }
+
+    .music-button i {
+      font-size: 22px;
+      color: var(--text-primary);
+      flex-shrink: 0;
+    }
+
+    .music-button span {
+      font-size: 14px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .music-button.fill {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    /* ─── Takes List ─── */
+    .takes-scroll-wrapper {
+      padding: 0 16px;
+    }
+
+    .takes-list {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .takes-list::-webkit-scrollbar { display: none; }
+
+    .take-card {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+      width: 200px;
+    }
+
+    .take-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      background: var(--bg-overlay);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .ta-duration {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent);
+      color: var(--text-dark);
+      font-size: 14px;
+      font-weight: 400;
+      border-radius: var(--radius-sm);
+      height: 30px;
+      padding: 0 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .take-label i {
+      font-size: 26px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .take-label i:hover {
+      transform: scale(1.15);
+    }
+
+    .take-label i.icon-default { color: var(--text-primary); }
+    .take-label i.icon-active { color: var(--accent); }
+
+    .take-body {
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .take-body.inputs {
+      background: var(--bg-overlay);
+      position: relative;
+    }
+
+    .take-body.inputs::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #54554b, rgba(0,0,0,0.2));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .take-body.inputs:hover::before {
+      opacity: 1;
+    }
+
+    .take-body.inputs > *,
+    .take-body.outputs > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .take-body.outputs {
+      background: var(--bg-overlay);
+      position: relative;
+    }
+
+    .take-body.outputs::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #54554b, rgba(0,0,0,0.2));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .take-body.outputs:hover::before {
+      opacity: 1;
+    }
+
+    .prompt-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-sm);
+      padding: 8px;
+      height: 160px;
+      overflow-y: auto;
+      resize: none;
+      width: 100%;
+      font-family: var(--font);
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      line-height: 1.4;
+      outline: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.1) transparent;
+    }
+
+    .prompt-box::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .prompt-box::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 4px 0;
+    }
+
+    .prompt-box::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 99px;
+    }
+
+    .prompt-box::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.28);
+    }
+
+    .video-thumbnail-container {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      background: var(--bg-card);
+    }
+
+    .video-thumbnail-container img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-thumbnail-play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(237, 232, 221, 0.3);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .video-thumbnail-play i {
+      font-size: 22px;
+      color: #fff;
+    }
+
+    .video-thumbnail-play:hover {
+      background: rgba(237, 232, 221, 0.5);
+    }
+
+    /* Frame reference / dropzone */
+    .take-body:has(.frame-dropzone + .frame-dropzone) {
+      flex-direction: row;
+    }
+
+    .frame-dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .frame-preview {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-sm);
+      background: rgba(154, 154, 154, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .frame-preview:hover {
+      background: rgba(154, 154, 154, 0.45);
+    }
+
+    .frame-preview i {
+      font-size: 32px;
+      color: var(--text-primary);
+    }
+
+    .frame-dropzone span {
+      font-size: 13px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    /* Add Take */
+    .add-take-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      height: 100%;
+    }
+
+    .add-take-inner {
+      background: var(--bg-overlay);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 106px;
+      height: 100%;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      position: relative;
+    }
+
+    .add-take-inner::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #54554b, rgba(0,0,0,0.2));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .add-take-inner:hover::before {
+      opacity: 1;
+    }
+
+    .add-take-inner > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .add-take-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex: 1;
+      cursor: pointer;
+    }
+
+    .add-take-icon {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-sm);
+      background: rgba(154, 154, 154, 0.3);
+      min-height: 60px;
+      transition: background 0.2s;
+    }
+
+    .add-take-icon:hover {
+      background: rgba(154, 154, 154, 0.45);
+    }
+
+    .add-take-icon i {
+      font-size: 28px;
+      color: var(--text-primary);
+    }
+
+    .add-take-btn span {
+      font-size: 13px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    /* ─── Create New Take (bottom CTA) ─── */
+    .create-take-wrapper {
+      padding: 0 16px;
+    }
+
+    .create-new-take {
+      background: var(--bg-overlay);
+      border-radius: var(--radius-lg);
+      padding: 8px;
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      position: relative;
+    }
+
+    .create-new-take::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #54554b, rgba(0,0,0,0.2));
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .create-new-take:hover::before {
+      opacity: 1;
+    }
+
+    .create-new-take > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .create-take-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .create-take-btn-area {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius-sm);
+      background: rgba(154, 154, 154, 0.3);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .create-take-btn-area:hover {
+      background: rgba(154, 154, 154, 0.45);
+    }
+
+    .create-take-btn-area .plus-icon {
+      background: var(--bg-overlay);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .create-take-btn-area i {
+      font-size: 24px;
+      color: var(--text-primary);
+    }
+
+    .create-take-content > span {
+      font-size: 14px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    /* ═══════════════════════════ RESPONSIVE ═══════════════════════════ */
+
+    /* Mobile-first: max 480px */
+    @media (max-width: 480px) {
+      .vertical-video-preview {
+        width: 80vw;
+        max-height: 45%;
+      }
+      .right-side-menu {
+        right: 8px;
+        padding: 10px;
+        gap: 12px;
+      }
+      .right-side-menu i {
+        font-size: 26px;
+      }
+      .take-card {
+        width: 170px;
+      }
+      .prompt-box {
+        height: 130px;
+      }
+      .video-thumbnail-container img {
+        height: 130px;
+      }
+      .time-info {
+        font-size: 14px;
+      }
+      .alert-joining span {
+        font-size: 14px;
+      }
+    }
+
+    /* Larger phones 481-768 */
+    @media (min-width: 481px) and (max-width: 768px) {
+      .vertical-video-preview {
+        max-height: 50%;
+      }
+    }
+
+    /* Tablet+ (show side by side if wanted) */
+    @media (min-width: 769px) {
+      .vertical-video-preview {
+        max-height: 65%;
+      }
+    }
+
+    /* Landscape mode optimization */
+    @media (max-height: 500px) {
+      .vertical-video-preview {
+        max-height: 35%;
+        width: 60vw;
+      }
+      .editor-controls {
+        gap: 8px;
+        padding: 8px 0;
+      }
+      .player-control {
+        padding: 8px;
+        gap: 8px;
+      }
+      .create-new-take {
+        height: 70px;
+      }
+    }
+
+    /* ─── Take Type: Image Dropzone ─── */
+    .take-type-image .take-body,
+    .take-type-video .take-body {
+      padding: 8;
+      overflow: hidden;
+    }
+
+    .media-dropzone {
+      width: 100%;
+      height: 160px;
+      border-radius: var(--radius-sm);
+      border: 1.5px dashed rgba(255,255,255,0.15);
+      background: var(--bg-card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-dropzone:hover,
+    .media-dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(232, 255, 23, 0.04);
+    }
+
+    .media-dropzone.drag-over {
+      border-style: solid;
+    }
+
+    .media-dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+
+    .dropzone-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .dropzone-placeholder i {
+      font-size: 30px;
+      color: rgba(200, 200, 200, 0.45);
+      transition: color 0.2s;
+    }
+
+    .media-dropzone:hover .dropzone-placeholder i,
+    .media-dropzone.drag-over .dropzone-placeholder i {
+      color: var(--accent);
+    }
+
+    .dropzone-placeholder span {
+      font-size: 11px;
+      color: rgba(200,200,200,0.4);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .dropzone-placeholder .dz-type-badge {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(232,255,23,0.12);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    /* Preview states */
+    .media-dropzone .dz-preview-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
+      border-radius: var(--radius-sm);
+    }
+
+    .media-dropzone .dz-preview-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
+      border-radius: var(--radius-sm);
+    }
+
+    .media-dropzone.has-media .dropzone-placeholder {
+      display: none;
+    }
+
+    .media-dropzone.has-media .dz-preview-img,
+    .media-dropzone.has-media .dz-preview-video {
+      display: block;
+    }
+
+    .media-dropzone.has-media {
+      border-style: solid;
+      border-color: rgba(255,255,255,0.1);
+    }
+
+    /* Overlay badge on filled media */
+    .dz-media-overlay {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      border-radius: 6px;
+      padding: 3px 7px;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .media-dropzone.has-media .dz-media-overlay {
+      display: flex;
+    }
+
+    .dz-media-overlay i {
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .dz-media-overlay span {
+      font-size: 11px;
+      color: var(--text-primary);
+      max-width: 100px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Remove media button */
+    .dz-remove-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      background: rgba(0,0,0,0.65);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .media-dropzone.has-media .dz-remove-btn {
+      display: flex;
+    }
+
+    .dz-remove-btn:hover {
+      background: rgba(220, 50, 50, 0.7);
+    }
+
+    .dz-remove-btn i {
+      font-size: 14px;
+      color: #fff;
+      pointer-events: none;
+    }
+
+    /* Video play overlay */
+    .dz-video-play {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(237, 232, 221, 0.3);
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .media-dropzone.has-media.is-video .dz-video-play {
+      display: flex;
+    }
+
+    .dz-video-play i {
+      font-size: 18px;
+      color: #fff;
+    }
+
+    /* ═══════════════════════════ SCROLLBAR HIDING GLOBAL ═══════════════════════════ */
+    .scroll-y {
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .scroll-y::-webkit-scrollbar { display: none; }
+
+    /* Smooth transitions */
+    i { transition: color 0.2s; }
+  </style>
 </head>
 <body>
 
-<div class="shell">
-  <div class="header">
-    <div class="logo-dot idle" id="dot"></div>
-    <span class="header-label">yt audio player</span>
-  </div>
+<div class="editor-page" id="editorPage">
+  <div class="body-wrapper">
+    <div class="aside">
+      <div class="canvas">
 
-  <div class="url-row">
-    <input class="url-input" id="urlInput" type="text" placeholder="cole a url do youtube..." autocomplete="off" spellcheck="false" />
-    <button class="load-btn" id="loadBtn">carregar</button>
-  </div>
+        <!-- ═══ Content / Video Preview Area ═══ -->
+        <div class="content-area">
+          <div class="vertical-video-preview" id="videoPreview">
+            <div class="alert-joining">
+              <i class="ph-bold ph-circle-notch"></i>
+              <span>0/7 pensando...</span>
+            </div>
+          </div>
 
-  <div class="wave-wrap">
-    <canvas id="waveCanvas"></canvas>
-    <div class="wave-overlay">
-      <span id="waveMsg">aguardando url</span>
-    </div>
-  </div>
+          <!-- Right side floating toolbar -->
+          <div class="right-side-menu" id="rightMenu">
+            <i class="ph ph-smiley-sticker" title="Stickers"></i>
+            <i class="ph ph-sparkle active" title="Efeitos"></i>
+            <i class="ph ph-plugs" title="Plugins"></i>
+            <i class="ph ph-sliders-horizontal" title="Ajustes"></i>
+          </div>
+        </div>
 
-  <div class="track-box">
-    <div class="track-title" id="trackTitle">—</div>
-    <div class="track-author" id="trackAuthor">nenhum áudio carregado</div>
-  </div>
+        <!-- ═══ Editor Controls Panel ═══ -->
+        <div class="editor-controls scroll-y" id="editorControls">
 
-  <div class="progress-bar" id="progressBar">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
+          <!-- Player Control -->
+          <div class="player-control-wrapper">
+            <div class="player-control">
+              <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar">
+                  <div class="progress-bar-fill" id="progressFill"></div>
+                </div>
+              </div>
+              <div class="info-controls">
+                <div class="time-info">00:38/01:10</div>
+                <div class="button-icons-play">
+                  <i class="ph-fill ph-play play-icon" id="btnPlay"></i>
+                  <i class="ph-fill ph-pause pause-icon" id="btnPause"></i>
+                  <i class="ph-fill ph-stop-circle stop-icon" id="btnStop"></i>
+                </div>
+                <div class="controls-right">
+                  <i class="ph ph-arrows-out" id="btnFullscreen" title="Tela cheia"></i>
+                </div>
+              </div>
+            </div>
+          </div>
 
-  <div class="time-row">
-    <span id="tCur">0:00</span>
-    <span id="tDur">0:00</span>
-  </div>
+          <!-- Music Section -->
+          <div class="music-section-wrapper">
+            <div class="music-section">
+              <div class="music-wave-frame">
+                <span>Local destinado aexibir o weveform do áudio</span>
+              </div>
+              <div class="music-row">
+                <div class="volume-control">
+                  <i class="ph-fill ph-speaker-simple-high"></i>
+                  <div class="volume-bar">
+                    <div class="volume-bar-fill"></div>
+                  </div>
+                </div>
+                <div class="music-button fill">
+                  <i class="ph-fill ph-music-note-simple"></i>
+                  <span>Gustavo Mioto - Pedido de Socorro</span>
+                </div>
+                <div class="music-button">
+                  <i class="ph-fill ph-music-note-simple"></i>
+                  <span>Selecionar música</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
-  <div class="controls">
-    <button class="ghost-btn" id="btnBack" title="−10s">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="1 4 1 10 7 10"/>
-        <path d="M3.51 15a9 9 0 1 0 .49-3.68"/>
-        <text x="8" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="Space Mono,monospace" font-weight="700">10</text>
-      </svg>
-    </button>
+          <!-- Takes Horizontal Scroll -->
+          <div class="takes-scroll-wrapper">
+            <div class="takes-list" id="takesList">
 
-    <button class="play-btn" id="playBtn">
-      <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <polygon points="5,3 19,12 5,21"/>
-      </svg>
-    </button>
+              <!-- Take 1: Texto (textarea) -->
+              <div class="take-card take-type-text">
+                <div class="take-label">
+                  <div class="ta-duration">10s</div>
+                  <i class="ph ph-play icon-default"></i>
+                  <i class="ph ph-text-t icon-active"></i>
+                  <i class="ph ph-paperclip icon-default"></i>
+                  <i class="ph ph-sparkle icon-default"></i>
+                </div>
+                <div class="take-body inputs">
+                  <textarea class="prompt-box">Ultra realistic 3D cinematic scene of a joyful stylized child with short reddish hair and freckles, eyes closed in peaceful happiness, sitting on top of a moss-covered rock.
 
-    <button class="ghost-btn" id="btnFwd" title="+10s">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/>
-        <path d="M20.49 15a9 9 0 1 1-.49-3.68"/>
-        <text x="8" y="15.5" font-size="5.5" fill="currentColor" stroke="none" font-family="Space Mono,monospace" font-weight="700">10</text>
-      </svg>
-    </button>
-  </div>
+Golden hour sunset lighting with soft warm sunlight coming from behind, creating a strong glowing rim light around the hair and shoulders, gentle wind moving the hair naturally, tiny dust particles floating in the air illuminated by the sunlight.</textarea>
+                </div>
+              </div>
 
-  <div class="vol-row">
-    <svg class="vol-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
-    </svg>
-    <input type="range" class="vol" id="volSlider" min="0" max="100" value="80" step="1">
-    <svg class="vol-icon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM18.5 12c0-2.77-1.5-5.15-3.75-6.45v12.89C16.75 17.16 18.5 14.77 18.5 12zM21 12c0 4.28-2.31 8-5.75 9.93l1.06 1.06C20.4 21.07 23 16.82 23 12S20.4 2.93 16.31 1.01L15.25 2.07C18.69 4 21 7.72 21 12z"/>
-    </svg>
-  </div>
-</div>
+              <!-- Take 2: Imagem (dropzone) -->
+              <div class="take-card take-type-image">
+                <div class="take-label">
+                  <div class="ta-duration">10s</div>
+                  <i class="ph ph-play icon-default"></i>
+                  <i class="ph ph-text-t icon-default"></i>
+                  <i class="ph ph-paperclip icon-active"></i>
+                  <i class="ph ph-sparkle icon-default"></i>
+                </div>
+                <div class="take-body inputs">
+                  <div class="media-dropzone" data-type="image">
+                    <input type="file" accept="image/*">
+                    <div class="dropzone-placeholder">
+                      <span class="dz-type-badge">Imagem</span>
+                      <i class="ph ph-image"></i>
+                      <span>Arraste ou clique<br>para anexar</span>
+                    </div>
+                    <img class="dz-preview-img" alt="Preview">
+                    <div class="dz-media-overlay">
+                      <i class="ph ph-image"></i>
+                      <span class="dz-filename"></span>
+                    </div>
+                    <div class="dz-remove-btn" title="Remover">
+                      <i class="ph ph-x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-<div id="ytplayer"></div>
+              <!-- Take 3: Vídeo (dropzone com thumbnail) -->
+              <div class="take-card take-type-video">
+                <div class="take-label">
+                  <div class="ta-duration">10s</div>
+                  <i class="ph ph-play icon-active"></i>
+                  <i class="ph ph-text-t icon-default"></i>
+                  <i class="ph ph-paperclip icon-default"></i>
+                  <i class="ph ph-sparkle icon-default"></i>
+                </div>
+                <div class="take-body inputs">
+                  <div class="media-dropzone" data-type="video">
+                    <input type="file" accept="video/*">
+                    <div class="dropzone-placeholder">
+                      <span class="dz-type-badge">Vídeo</span>
+                      <i class="ph ph-video-camera"></i>
+                      <span>Arraste ou clique<br>para anexar</span>
+                    </div>
+                    <canvas class="dz-preview-video"></canvas>
+                    <div class="dz-video-play">
+                      <i class="ph-fill ph-play"></i>
+                    </div>
+                    <div class="dz-media-overlay">
+                      <i class="ph ph-film-strip"></i>
+                      <span class="dz-filename"></span>
+                    </div>
+                    <div class="dz-remove-btn" title="Remover">
+                      <i class="ph ph-x"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Take 4: Texto -->
+              <div class="take-card take-type-text">
+                <div class="take-label">
+                  <div class="ta-duration">10s</div>
+                  <i class="ph ph-play icon-default"></i>
+                  <i class="ph ph-text-t icon-active"></i>
+                  <i class="ph ph-paperclip icon-default"></i>
+                  <i class="ph ph-sparkle icon-default"></i>
+                </div>
+                <div class="take-body inputs">
+                  <textarea class="prompt-box">Continue with a cinematic slow push-in towards the child's face, bokeh background transition, golden particles floating upward.</textarea>
+                </div>
+              </div>
+
+              <!-- Add Take button -->
+              <div class="add-take-card">
+                <div class="add-take-inner">
+                  <div class="add-take-btn" id="addTakeBtn">
+                    <div class="add-take-icon">
+                      <i class="ph ph-plus"></i>
+                    </div>
+                    <span>Add take</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Create New Take (bottom) -->
+          <div class="create-take-wrapper">
+            <div class="create-new-take">
+              <div class="create-take-content">
+                <div class="create-take-btn-area" id="createTakeBtn">
+                  <div class="plus-icon">
+                    <i class="ph ph-plus"></i>
+                  </div>
+                </div>
+                <span>Add first take</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- editor-controls -->
+
+      </div><!-- canvas -->
+    </div><!-- aside -->
+  </div><!-- body-wrapper -->
+</div><!-- editor-page -->
 
 <script>
-// ── Elements ──────────────────────────────────────────────────
-const urlInput    = document.getElementById('urlInput');
-const loadBtn     = document.getElementById('loadBtn');
-const playBtn     = document.getElementById('playBtn');
-const playIcon    = document.getElementById('playIcon');
-const btnBack     = document.getElementById('btnBack');
-const btnFwd      = document.getElementById('btnFwd');
-const progressBar = document.getElementById('progressBar');
-const progressFill= document.getElementById('progressFill');
-const tCur        = document.getElementById('tCur');
-const tDur        = document.getElementById('tDur');
-const trackTitle  = document.getElementById('trackTitle');
-const trackAuthor = document.getElementById('trackAuthor');
-const volSlider   = document.getElementById('volSlider');
-const dot         = document.getElementById('dot');
-const waveMsg     = document.getElementById('waveMsg');
-const canvas      = document.getElementById('waveCanvas');
-const ctx         = canvas.getContext('2d');
+  // ═══════════════════════════ Interactive Behaviors ═══════════════════════════
 
-// ── State ─────────────────────────────────────────────────────
-let player      = null;
-let ytReady     = false;
-let isPlaying   = false;
-let progTimer   = null;
-let waveAnim    = null;
+  // Progress bar click-to-seek
+  const progressBar = document.getElementById('progressBar');
+  const progressFill = document.getElementById('progressFill');
 
-// Waveform sim state
-const NUM_BARS  = 64;
-const barHeights= new Float32Array(NUM_BARS);
-const barTargets= new Float32Array(NUM_BARS);
-let   wavePhase = 0;
+  progressBar.addEventListener('click', (e) => {
+    const rect = progressBar.getBoundingClientRect();
+    const pct = ((e.clientX - rect.left) / rect.width) * 100;
+    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    updateTimeDisplay(pct);
+  });
 
-// ── Canvas resize ─────────────────────────────────────────────
-function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width  = rect.width  * dpr;
-  canvas.height = rect.height * dpr;
-}
-resizeCanvas();
-window.addEventListener('resize', () => { resizeCanvas(); });
+  // Touch drag on progress bar
+  let isDragging = false;
+  progressBar.addEventListener('touchstart', (e) => { isDragging = true; }, { passive: true });
+  progressBar.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const rect = progressBar.getBoundingClientRect();
+    const touch = e.touches[0];
+    const pct = ((touch.clientX - rect.left) / rect.width) * 100;
+    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    updateTimeDisplay(pct);
+  }, { passive: true });
+  progressBar.addEventListener('touchend', () => { isDragging = false; });
 
-// ── Waveform drawing ──────────────────────────────────────────
-function genTargets(active) {
-  const t = Date.now() / 1000;
-  for (let i = 0; i < NUM_BARS; i++) {
-    if (!active) {
-      barTargets[i] = 0.03 + 0.02 * Math.sin(i * 0.35 + t * 0.6);
+  function updateTimeDisplay(pct) {
+    const totalSec = 70; // 01:10
+    const currentSec = Math.round((pct / 100) * totalSec);
+    const min = String(Math.floor(currentSec / 60)).padStart(2, '0');
+    const sec = String(currentSec % 60).padStart(2, '0');
+    document.querySelector('.time-info').textContent = `${min}:${sec}/01:10`;
+  }
+
+  // Play/Pause/Stop
+  document.getElementById('btnPlay').addEventListener('click', () => {
+    document.querySelector('.alert-joining span').textContent = '▶ Reproduzindo...';
+  });
+
+  document.getElementById('btnPause').addEventListener('click', () => {
+    document.querySelector('.alert-joining span').textContent = '⏸ Pausado';
+  });
+
+  document.getElementById('btnStop').addEventListener('click', () => {
+    progressFill.style.width = '0%';
+    document.querySelector('.time-info').textContent = '00:00/01:10';
+    document.querySelector('.alert-joining span').textContent = '⏹ Parado';
+  });
+
+  // Right side menu toggle
+  document.querySelectorAll('.right-side-menu i').forEach(icon => {
+    icon.addEventListener('click', () => {
+      document.querySelectorAll('.right-side-menu i').forEach(i => i.classList.remove('active'));
+      icon.classList.add('active');
+    });
+  });
+
+  // Fullscreen toggle
+  document.getElementById('btnFullscreen').addEventListener('click', () => {
+    const preview = document.getElementById('videoPreview');
+    if (!document.fullscreenElement) {
+      preview.requestFullscreen?.() || preview.webkitRequestFullscreen?.();
     } else {
-      // Organic wave: multiple sine layers + random flutter
-      const base = 0.25
-        + 0.25 * Math.sin(i * 0.18 + wavePhase * 1.1)
-        + 0.15 * Math.sin(i * 0.45 - wavePhase * 1.7)
-        + 0.10 * Math.sin(i * 0.09 + wavePhase * 0.5);
-      barTargets[i] = Math.max(0.04, Math.min(0.95, base));
+      document.exitFullscreen?.() || document.webkitExitFullscreen?.();
+    }
+  });
+
+  // ═══ Dropzone Logic ═══
+
+  function initDropzone(dz) {
+    const input = dz.querySelector('input[type="file"]');
+    const type = dz.dataset.type; // 'image' or 'video'
+
+    // Drag events
+    dz.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dz.classList.add('drag-over');
+    });
+    dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+    dz.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dz.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleMediaFile(dz, file, type);
+    });
+
+    // Click-to-browse (handled by file input overlay, but also manual)
+    input.addEventListener('change', () => {
+      if (input.files[0]) handleMediaFile(dz, input.files[0], type);
+    });
+
+    // Remove button
+    const removeBtn = dz.querySelector('.dz-remove-btn');
+    if (removeBtn) {
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        clearDropzone(dz, type);
+      });
     }
   }
-}
 
-function drawFrame(active) {
-  const dpr  = window.devicePixelRatio || 1;
-  const W    = canvas.width  / dpr;
-  const H    = canvas.height / dpr;
-  const cx   = canvas.getContext('2d');
+  function handleMediaFile(dz, file, type) {
+    const filenameEl = dz.querySelector('.dz-filename');
+    if (filenameEl) filenameEl.textContent = file.name;
 
-  cx.clearRect(0, 0, canvas.width, canvas.height);
-  cx.save();
-  cx.scale(dpr, dpr);
-
-  const gap   = 2;
-  const barW  = (W - gap * (NUM_BARS - 1)) / NUM_BARS;
-  const lerp  = active ? 0.14 : 0.06;
-
-  for (let i = 0; i < NUM_BARS; i++) {
-    barHeights[i] += (barTargets[i] - barHeights[i]) * lerp;
-    const h   = barHeights[i] * H * 0.85;
-    const x   = i * (barW + gap);
-    const y   = (H - h) / 2;
-
-    // color: brighter toward center
-    const dist = Math.abs(i - NUM_BARS / 2) / (NUM_BARS / 2);
-    const alpha = active ? (0.55 + barHeights[i] * 0.45) : 0.18;
-    const r = Math.round(108 + dist * 40);
-    const g = Math.round(99  - dist * 20);
-    const b = 255;
-    cx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-    cx.beginPath();
-    cx.roundRect(x, y, barW, h, barW / 2);
-    cx.fill();
+    if (type === 'image') {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = dz.querySelector('.dz-preview-img');
+        img.src = ev.target.result;
+        dz.classList.add('has-media');
+      };
+      reader.readAsDataURL(file);
+    } else if (type === 'video') {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.src = url;
+      video.muted = true;
+      video.preload = 'metadata';
+      video.addEventListener('loadeddata', () => {
+        video.currentTime = 0.5;
+      });
+      video.addEventListener('seeked', () => {
+        const canvas = dz.querySelector('.dz-preview-video');
+        canvas.width = video.videoWidth || 200;
+        canvas.height = video.videoHeight || 160;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        dz.classList.add('has-media', 'is-video');
+      });
+      // Fallback if seeked doesn't fire
+      video.addEventListener('error', () => {
+        dz.classList.add('has-media', 'is-video');
+      });
+    }
   }
 
-  cx.restore();
-}
-
-function animLoop(active) {
-  wavePhase += active ? 0.045 : 0.008;
-  genTargets(active);
-  drawFrame(active);
-  waveAnim = requestAnimationFrame(() => animLoop(active));
-}
-
-function startWave(active) {
-  if (waveAnim) cancelAnimationFrame(waveAnim);
-  waveMsg.style.opacity = active ? '0' : '1';
-  animLoop(active);
-}
-
-// start idle wave immediately
-startWave(false);
-
-// ── Helpers ───────────────────────────────────────────────────
-function fmt(s) {
-  if (!s || isNaN(s)) return '0:00';
-  s = Math.floor(s);
-  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-}
-
-function extractId(url) {
-  url = url.trim();
-  const m = url.match(/(?:v=|\/embed\/|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-  if (m) return m[1];
-  if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
-  return null;
-}
-
-function setPlayIcon(playing) {
-  playIcon.innerHTML = playing
-    ? '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>'
-    : '<polygon points="5,3 19,12 5,21"/>';
-}
-
-function startProgress() {
-  if (progTimer) clearInterval(progTimer);
-  progTimer = setInterval(() => {
-    if (!player || typeof player.getCurrentTime !== 'function') return;
-    try {
-      const cur = player.getCurrentTime();
-      const dur = player.getDuration();
-      if (dur > 0) {
-        progressFill.style.width = (cur / dur * 100).toFixed(2) + '%';
-        tCur.textContent = fmt(cur);
-        tDur.textContent = fmt(dur);
+  function clearDropzone(dz, type) {
+    dz.classList.remove('has-media', 'is-video');
+    const input = dz.querySelector('input[type="file"]');
+    if (input) input.value = '';
+    if (type === 'image') {
+      const img = dz.querySelector('.dz-preview-img');
+      if (img) img.src = '';
+    } else if (type === 'video') {
+      const canvas = dz.querySelector('.dz-preview-video');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-    } catch (_) {}
-  }, 400);
-}
-
-// ── YouTube IFrame API ────────────────────────────────────────
-window.onYouTubeIframeAPIReady = () => { ytReady = true; };
-
-const ytScript = document.createElement('script');
-ytScript.src = 'https://www.youtube.com/iframe_api';
-document.head.appendChild(ytScript);
-
-function createPlayer(videoId) {
-  // tear down old player
-  if (player) { try { player.destroy(); } catch (_) {} player = null; }
-  if (progTimer) clearInterval(progTimer);
-  isPlaying = false;
-  setPlayIcon(false);
-  dot.className = 'logo-dot idle';
-  trackAuthor.textContent = 'carregando...';
-  progressFill.style.width = '0%';
-  tCur.textContent = '0:00';
-  tDur.textContent = '0:00';
-  startWave(false);
-
-  const container = document.getElementById('ytplayer');
-  container.innerHTML = '';
-  const div = document.createElement('div');
-  div.id = 'yt_inner';
-  container.appendChild(div);
-
-  function build() {
-    player = new YT.Player('yt_inner', {
-      videoId,
-      height: '1',
-      width: '1',
-      playerVars: {
-        autoplay: 1,
-        controls: 0,
-        playsinline: 1,
-        enablejsapi: 1,
-        rel: 0,
-        iv_load_policy: 3,
-        modestbranding: 1,
-      },
-      events: {
-        onReady(e) {
-          e.target.setVolume(parseInt(volSlider.value));
-          e.target.playVideo();
-          const data = e.target.getVideoData();
-          trackTitle.textContent  = data.title  || 'Sem título';
-          trackAuthor.textContent = data.author || 'Desconhecido';
-          dot.className = 'logo-dot playing';
-          waveMsg.style.opacity = '0';
-          startProgress();
-        },
-        onStateChange(e) {
-          const S = YT.PlayerState;
-          if (e.data === S.PLAYING) {
-            isPlaying = true;
-            setPlayIcon(true);
-            dot.className = 'logo-dot playing';
-            startWave(true);
-            startProgress();
-          } else if (e.data === S.PAUSED) {
-            isPlaying = false;
-            setPlayIcon(false);
-            dot.className = 'logo-dot idle';
-            startWave(false);
-          } else if (e.data === S.ENDED) {
-            isPlaying = false;
-            setPlayIcon(false);
-            dot.className = 'logo-dot idle';
-            startWave(false);
-            progressFill.style.width = '100%';
-            if (progTimer) clearInterval(progTimer);
-          }
-        },
-        onError(e) {
-          trackTitle.textContent  = 'Erro ao carregar';
-          trackAuthor.textContent = 'verifique a url ou tente outro vídeo';
-          dot.className = 'logo-dot idle';
-          startWave(false);
-          waveMsg.style.opacity = '1';
-          waveMsg.textContent = 'erro ao carregar';
-        }
-      }
-    });
+    }
+    const filenameEl = dz.querySelector('.dz-filename');
+    if (filenameEl) filenameEl.textContent = '';
   }
 
-  if (ytReady) build();
-  else {
-    const t = setInterval(() => { if (ytReady) { clearInterval(t); build(); } }, 100);
+  // Init all existing dropzones
+  document.querySelectorAll('.media-dropzone').forEach(dz => initDropzone(dz));
+
+  // ═══ Add take button ═══
+  let addTakeType = 'text'; // cycles: text → image → video → text
+  const takeTypeOrder = ['text', 'image', 'video'];
+  let addTakeTypeIndex = 0;
+
+  function createTakeCard(type) {
+    const card = document.createElement('div');
+    card.className = `take-card take-type-${type}`;
+    card.style.animation = 'fadeIn 0.3s ease';
+
+    let iconActive = type === 'text'
+      ? `<i class="ph ph-play icon-default"></i><i class="ph ph-text-t icon-active"></i><i class="ph ph-paperclip icon-default"></i>`
+      : type === 'image'
+      ? `<i class="ph ph-play icon-default"></i><i class="ph ph-text-t icon-default"></i><i class="ph ph-paperclip icon-active"></i>`
+      : `<i class="ph ph-play icon-active"></i><i class="ph ph-text-t icon-default"></i><i class="ph ph-paperclip icon-default"></i>`;
+
+    let bodyHTML = '';
+    if (type === 'text') {
+      bodyHTML = `<div class="take-body inputs"><textarea class="prompt-box" placeholder="Descreva a cena..."></textarea></div>`;
+    } else if (type === 'image') {
+      bodyHTML = `
+        <div class="take-body inputs">
+          <div class="media-dropzone" data-type="image">
+            <input type="file" accept="image/*">
+            <div class="dropzone-placeholder">
+              <span class="dz-type-badge">Imagem</span>
+              <i class="ph ph-image"></i>
+              <span>Arraste ou clique<br>para anexar</span>
+            </div>
+            <img class="dz-preview-img" alt="Preview">
+            <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+            <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+          </div>
+        </div>`;
+    } else {
+      bodyHTML = `
+        <div class="take-body inputs">
+          <div class="media-dropzone" data-type="video">
+            <input type="file" accept="video/*">
+            <div class="dropzone-placeholder">
+              <span class="dz-type-badge">Vídeo</span>
+              <i class="ph ph-video-camera"></i>
+              <span>Arraste ou clique<br>para anexar</span>
+            </div>
+            <canvas class="dz-preview-video"></canvas>
+            <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
+            <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
+            <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+          </div>
+        </div>`;
+    }
+
+    card.innerHTML = `
+      <div class="take-label">
+        <div class="ta-duration">10s</div>
+        ${iconActive}
+        <i class="ph ph-sparkle icon-default"></i>
+      </div>
+      ${bodyHTML}
+    `;
+
+    // Init dropzone if needed
+    const dz = card.querySelector('.media-dropzone');
+    if (dz) initDropzone(dz);
+
+    return card;
   }
-}
 
-// ── Event listeners ───────────────────────────────────────────
-loadBtn.addEventListener('click', () => {
-  const id = extractId(urlInput.value);
-  if (!id) {
-    trackAuthor.textContent = 'url inválida — tente novamente';
-    return;
-  }
-  createPlayer(id);
-});
+  document.getElementById('addTakeBtn').addEventListener('click', () => {
+    const takesList = document.getElementById('takesList');
+    const addCard = takesList.querySelector('.add-take-card');
+    addTakeTypeIndex = (addTakeTypeIndex + 1) % takeTypeOrder.length;
+    const newTake = createTakeCard(takeTypeOrder[addTakeTypeIndex]);
+    takesList.insertBefore(newTake, addCard);
+    newTake.scrollIntoView({ behavior: 'smooth', inline: 'end' });
+  });
 
-urlInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') loadBtn.click();
-});
-
-playBtn.addEventListener('click', () => {
-  if (!player) return;
-  isPlaying ? player.pauseVideo() : player.playVideo();
-});
-
-btnBack.addEventListener('click', () => {
-  if (!player) return;
-  player.seekTo(Math.max(0, player.getCurrentTime() - 10), true);
-});
-
-btnFwd.addEventListener('click', () => {
-  if (!player) return;
-  player.seekTo(player.getCurrentTime() + 10, true);
-});
-
-progressBar.addEventListener('click', e => {
-  if (!player) return;
-  const r   = progressBar.getBoundingClientRect();
-  const pct = (e.clientX - r.left) / r.width;
-  const dur = player.getDuration();
-  if (dur) player.seekTo(pct * dur, true);
-});
-
-volSlider.addEventListener('input', () => {
-  if (player && typeof player.setVolume === 'function') {
-    player.setVolume(parseInt(volSlider.value));
-  }
-});
+  // Create take button (bottom)
+  document.getElementById('createTakeBtn').addEventListener('click', () => {
+    document.getElementById('addTakeBtn').click();
+  });
 </script>
+
 </body>
 </html>
