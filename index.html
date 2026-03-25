@@ -172,7 +172,7 @@
     .editor-controls {
       background: var(--bg-surface);
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-      padding: 16px 0;
+      padding: 8px 0;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -185,7 +185,7 @@
 
     /* ─── Player Control ─── */
     .player-control-wrapper {
-      padding: 0 16px;
+      padding: 0 8px;
     }
 
     .player-control {
@@ -277,7 +277,7 @@
 
     /* ─── Music Section ─── */
     .music-section-wrapper {
-      padding: 0 16px;
+      padding: 0 8px;
     }
 
     .music-section {
@@ -392,7 +392,7 @@
 
     /* ─── Takes List ─── */
     .takes-scroll-wrapper {
-      padding: 0 16px;
+      padding: 0 8px;
     }
 
     .takes-list {
@@ -642,7 +642,6 @@
       align-items: center;
       gap: 8px;
       flex-shrink: 0;
-      height: 100%;
     }
 
     .add-take-inner {
@@ -720,7 +719,7 @@
 
     /* ─── Create New Take (bottom CTA) ─── */
     .create-take-wrapper {
-      padding: 0 16px;
+      padding: 0 8px;
     }
 
     .create-new-take {
@@ -868,11 +867,12 @@
       }
     }
 
-    /* ─── Take Type: Image Dropzone ─── */
-    .take-type-image .take-body,
-    .take-type-video .take-body {
-      padding: 8;
-      overflow: hidden;
+    /* ─── Take Tab Content ─── */
+    .take-tab-panel {
+      display: none;
+    }
+    .take-tab-panel.active {
+      display: block;
     }
 
     .media-dropzone {
@@ -1169,94 +1169,177 @@
           <div class="takes-scroll-wrapper">
             <div class="takes-list" id="takesList">
 
-              <!-- Take 1: Texto (textarea) -->
-              <div class="take-card take-type-text">
+              <!-- Take 1 -->
+              <div class="take-card" data-active-tab="text">
                 <div class="take-label">
                   <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default"></i>
-                  <i class="ph ph-text-t icon-active"></i>
-                  <i class="ph ph-paperclip icon-default"></i>
-                  <i class="ph ph-sparkle icon-default"></i>
+                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
+                  <i class="ph ph-text-t icon-active" data-tab="text" title="Texto"></i>
+                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
+                  <i class="ph ph-sparkle icon-default" title="IA"></i>
                 </div>
                 <div class="take-body inputs">
-                  <textarea class="prompt-box">Ultra realistic 3D cinematic scene of a joyful stylized child with short reddish hair and freckles, eyes closed in peaceful happiness, sitting on top of a moss-covered rock.
+                  <div class="take-tab-panel active" data-panel="text">
+                    <textarea class="prompt-box">Ultra realistic 3D cinematic scene of a joyful stylized child with short reddish hair and freckles, eyes closed in peaceful happiness, sitting on top of a moss-covered rock.
 
 Golden hour sunset lighting with soft warm sunlight coming from behind, creating a strong glowing rim light around the hair and shoulders, gentle wind moving the hair naturally, tiny dust particles floating in the air illuminated by the sunlight.</textarea>
-                </div>
-              </div>
-
-              <!-- Take 2: Imagem (dropzone) -->
-              <div class="take-card take-type-image">
-                <div class="take-label">
-                  <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default"></i>
-                  <i class="ph ph-text-t icon-default"></i>
-                  <i class="ph ph-paperclip icon-active"></i>
-                  <i class="ph ph-sparkle icon-default"></i>
-                </div>
-                <div class="take-body inputs">
-                  <div class="media-dropzone" data-type="image">
-                    <input type="file" accept="image/*">
-                    <div class="dropzone-placeholder">
-                      <span class="dz-type-badge">Imagem</span>
-                      <i class="ph ph-image"></i>
-                      <span>Arraste ou clique<br>para anexar</span>
+                  </div>
+                  <div class="take-tab-panel" data-panel="image">
+                    <div class="media-dropzone" data-type="image">
+                      <input type="file" accept="image/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Imagem</span>
+                        <i class="ph ph-image"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <img class="dz-preview-img" alt="Preview">
+                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
                     </div>
-                    <img class="dz-preview-img" alt="Preview">
-                    <div class="dz-media-overlay">
-                      <i class="ph ph-image"></i>
-                      <span class="dz-filename"></span>
-                    </div>
-                    <div class="dz-remove-btn" title="Remover">
-                      <i class="ph ph-x"></i>
+                  </div>
+                  <div class="take-tab-panel" data-panel="video">
+                    <div class="media-dropzone" data-type="video">
+                      <input type="file" accept="video/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Vídeo</span>
+                        <i class="ph ph-video-camera"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <canvas class="dz-preview-video"></canvas>
+                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
+                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Take 3: Vídeo (dropzone com thumbnail) -->
-              <div class="take-card take-type-video">
+              <!-- Take 2 -->
+              <div class="take-card" data-active-tab="image">
                 <div class="take-label">
                   <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-active"></i>
-                  <i class="ph ph-text-t icon-default"></i>
-                  <i class="ph ph-paperclip icon-default"></i>
-                  <i class="ph ph-sparkle icon-default"></i>
+                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
+                  <i class="ph ph-text-t icon-default" data-tab="text" title="Texto"></i>
+                  <i class="ph ph-paperclip icon-active" data-tab="image" title="Imagem"></i>
+                  <i class="ph ph-sparkle icon-default" title="IA"></i>
                 </div>
                 <div class="take-body inputs">
-                  <div class="media-dropzone" data-type="video">
-                    <input type="file" accept="video/*">
-                    <div class="dropzone-placeholder">
-                      <span class="dz-type-badge">Vídeo</span>
-                      <i class="ph ph-video-camera"></i>
-                      <span>Arraste ou clique<br>para anexar</span>
+                  <div class="take-tab-panel" data-panel="text">
+                    <textarea class="prompt-box" placeholder="Descreva a cena..."></textarea>
+                  </div>
+                  <div class="take-tab-panel active" data-panel="image">
+                    <div class="media-dropzone" data-type="image">
+                      <input type="file" accept="image/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Imagem</span>
+                        <i class="ph ph-image"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <img class="dz-preview-img" alt="Preview">
+                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
                     </div>
-                    <canvas class="dz-preview-video"></canvas>
-                    <div class="dz-video-play">
-                      <i class="ph-fill ph-play"></i>
-                    </div>
-                    <div class="dz-media-overlay">
-                      <i class="ph ph-film-strip"></i>
-                      <span class="dz-filename"></span>
-                    </div>
-                    <div class="dz-remove-btn" title="Remover">
-                      <i class="ph ph-x"></i>
+                  </div>
+                  <div class="take-tab-panel" data-panel="video">
+                    <div class="media-dropzone" data-type="video">
+                      <input type="file" accept="video/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Vídeo</span>
+                        <i class="ph ph-video-camera"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <canvas class="dz-preview-video"></canvas>
+                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
+                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Take 4: Texto -->
-              <div class="take-card take-type-text">
+              <!-- Take 3 -->
+              <div class="take-card" data-active-tab="video">
                 <div class="take-label">
                   <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default"></i>
-                  <i class="ph ph-text-t icon-active"></i>
-                  <i class="ph ph-paperclip icon-default"></i>
-                  <i class="ph ph-sparkle icon-default"></i>
+                  <i class="ph ph-play icon-active" data-tab="video" title="Vídeo"></i>
+                  <i class="ph ph-text-t icon-default" data-tab="text" title="Texto"></i>
+                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
+                  <i class="ph ph-sparkle icon-default" title="IA"></i>
                 </div>
                 <div class="take-body inputs">
-                  <textarea class="prompt-box">Continue with a cinematic slow push-in towards the child's face, bokeh background transition, golden particles floating upward.</textarea>
+                  <div class="take-tab-panel" data-panel="text">
+                    <textarea class="prompt-box" placeholder="Descreva a cena..."></textarea>
+                  </div>
+                  <div class="take-tab-panel" data-panel="image">
+                    <div class="media-dropzone" data-type="image">
+                      <input type="file" accept="image/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Imagem</span>
+                        <i class="ph ph-image"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <img class="dz-preview-img" alt="Preview">
+                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+                    </div>
+                  </div>
+                  <div class="take-tab-panel active" data-panel="video">
+                    <div class="media-dropzone" data-type="video">
+                      <input type="file" accept="video/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Vídeo</span>
+                        <i class="ph ph-video-camera"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <canvas class="dz-preview-video"></canvas>
+                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
+                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Take 4 -->
+              <div class="take-card" data-active-tab="text">
+                <div class="take-label">
+                  <div class="ta-duration">10s</div>
+                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
+                  <i class="ph ph-text-t icon-active" data-tab="text" title="Texto"></i>
+                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
+                  <i class="ph ph-sparkle icon-default" title="IA"></i>
+                </div>
+                <div class="take-body inputs">
+                  <div class="take-tab-panel active" data-panel="text">
+                    <textarea class="prompt-box">Continue with a cinematic slow push-in towards the child's face, bokeh background transition, golden particles floating upward.</textarea>
+                  </div>
+                  <div class="take-tab-panel" data-panel="image">
+                    <div class="media-dropzone" data-type="image">
+                      <input type="file" accept="image/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Imagem</span>
+                        <i class="ph ph-image"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <img class="dz-preview-img" alt="Preview">
+                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+                    </div>
+                  </div>
+                  <div class="take-tab-panel" data-panel="video">
+                    <div class="media-dropzone" data-type="video">
+                      <input type="file" accept="video/*">
+                      <div class="dropzone-placeholder">
+                        <span class="dz-type-badge">Vídeo</span>
+                        <i class="ph ph-video-camera"></i>
+                        <span>Arraste ou clique<br>para anexar</span>
+                      </div>
+                      <canvas class="dz-preview-video"></canvas>
+                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
+                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
+                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1456,28 +1539,54 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
   // Init all existing dropzones
   document.querySelectorAll('.media-dropzone').forEach(dz => initDropzone(dz));
 
-  // ═══ Add take button ═══
-  let addTakeType = 'text'; // cycles: text → image → video → text
-  const takeTypeOrder = ['text', 'image', 'video'];
-  let addTakeTypeIndex = 0;
+  // ═══ Take Label Tab Switching ═══
 
-  function createTakeCard(type) {
+  function initTakeCardTabs(card) {
+    const tabIcons = card.querySelectorAll('.take-label i[data-tab]');
+    tabIcons.forEach(icon => {
+      icon.addEventListener('click', () => {
+        const tab = icon.dataset.tab;
+        switchTakeTab(card, tab);
+      });
+    });
+  }
+
+  function switchTakeTab(card, tab) {
+    // Update icon states
+    card.querySelectorAll('.take-label i[data-tab]').forEach(i => {
+      i.classList.toggle('icon-active', i.dataset.tab === tab);
+      i.classList.toggle('icon-default', i.dataset.tab !== tab);
+    });
+    // Update panels
+    card.querySelectorAll('.take-tab-panel').forEach(panel => {
+      panel.classList.toggle('active', panel.dataset.panel === tab);
+    });
+    card.dataset.activeTab = tab;
+  }
+
+  // Init tabs for all existing cards
+  document.querySelectorAll('.take-card').forEach(card => initTakeCardTabs(card));
+
+  // ═══ Add take button ═══
+  function createTakeCard() {
     const card = document.createElement('div');
-    card.className = `take-card take-type-${type}`;
+    card.className = 'take-card';
+    card.dataset.activeTab = 'text';
     card.style.animation = 'fadeIn 0.3s ease';
 
-    let iconActive = type === 'text'
-      ? `<i class="ph ph-play icon-default"></i><i class="ph ph-text-t icon-active"></i><i class="ph ph-paperclip icon-default"></i>`
-      : type === 'image'
-      ? `<i class="ph ph-play icon-default"></i><i class="ph ph-text-t icon-default"></i><i class="ph ph-paperclip icon-active"></i>`
-      : `<i class="ph ph-play icon-active"></i><i class="ph ph-text-t icon-default"></i><i class="ph ph-paperclip icon-default"></i>`;
-
-    let bodyHTML = '';
-    if (type === 'text') {
-      bodyHTML = `<div class="take-body inputs"><textarea class="prompt-box" placeholder="Descreva a cena..."></textarea></div>`;
-    } else if (type === 'image') {
-      bodyHTML = `
-        <div class="take-body inputs">
+    card.innerHTML = `
+      <div class="take-label">
+        <div class="ta-duration">10s</div>
+        <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
+        <i class="ph ph-text-t icon-active" data-tab="text" title="Texto"></i>
+        <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
+        <i class="ph ph-sparkle icon-default" title="IA"></i>
+      </div>
+      <div class="take-body inputs">
+        <div class="take-tab-panel active" data-panel="text">
+          <textarea class="prompt-box" placeholder="Descreva a cena..."></textarea>
+        </div>
+        <div class="take-tab-panel" data-panel="image">
           <div class="media-dropzone" data-type="image">
             <input type="file" accept="image/*">
             <div class="dropzone-placeholder">
@@ -1489,10 +1598,8 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
             <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
             <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
           </div>
-        </div>`;
-    } else {
-      bodyHTML = `
-        <div class="take-body inputs">
+        </div>
+        <div class="take-tab-panel" data-panel="video">
           <div class="media-dropzone" data-type="video">
             <input type="file" accept="video/*">
             <div class="dropzone-placeholder">
@@ -1505,21 +1612,12 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
             <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
             <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
           </div>
-        </div>`;
-    }
-
-    card.innerHTML = `
-      <div class="take-label">
-        <div class="ta-duration">10s</div>
-        ${iconActive}
-        <i class="ph ph-sparkle icon-default"></i>
+        </div>
       </div>
-      ${bodyHTML}
     `;
 
-    // Init dropzone if needed
-    const dz = card.querySelector('.media-dropzone');
-    if (dz) initDropzone(dz);
+    card.querySelectorAll('.media-dropzone').forEach(dz => initDropzone(dz));
+    initTakeCardTabs(card);
 
     return card;
   }
@@ -1527,8 +1625,7 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
   document.getElementById('addTakeBtn').addEventListener('click', () => {
     const takesList = document.getElementById('takesList');
     const addCard = takesList.querySelector('.add-take-card');
-    addTakeTypeIndex = (addTakeTypeIndex + 1) % takeTypeOrder.length;
-    const newTake = createTakeCard(takeTypeOrder[addTakeTypeIndex]);
+    const newTake = createTakeCard();
     takesList.insertBefore(newTake, addCard);
     newTake.scrollIntoView({ behavior: 'smooth', inline: 'end' });
   });
