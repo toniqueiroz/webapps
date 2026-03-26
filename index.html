@@ -90,15 +90,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 16px;
     }
 
     .vertical-video-preview {
-      width: min(85vw, 365px);
-      height: min(75vh, 710px);
-      max-height: 60%;
+      height: 100%;
+      aspect-ratio: 9 / 16;
+      max-width: 100%;
       background: var(--bg-card);
       border-radius: var(--radius-xl);
-      border: 1px solid rgba(255,255,255,0.05);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -162,6 +162,7 @@
 
     .right-side-menu i:hover {
       transform: scale(1.1);
+      color: var(--accent);
     }
 
     .right-side-menu i.active {
@@ -210,7 +211,6 @@
       height: 6px;
       background: var(--progress-bg);
       border-radius: var(--radius-full);
-      overflow: hidden;
       cursor: pointer;
       position: relative;
     }
@@ -219,8 +219,38 @@
       height: 100%;
       background: var(--accent);
       border-radius: var(--radius-full);
-      width: 55%;
+      width: 0%;
       transition: width 0.1s;
+      position: relative;
+    }
+
+    .progress-bar-thumb {
+      position: absolute;
+      right: -7px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: grab;
+      z-index: 2;
+      transition: transform 0.15s;
+      box-shadow: 0 0 4px rgba(0,0,0,0.4);
+    }
+
+    .progress-bar-thumb:hover {
+      transform: translateY(-50%) scale(1.3);
+    }
+
+    .progress-bar-thumb:active,
+    .progress-bar-thumb.dragging {
+      cursor: grabbing;
+      transform: translateY(-50%) scale(1.4);
+    }
+
+    .progress-bar.dragging .progress-bar-fill {
+      transition: none;
     }
 
     .info-controls {
@@ -236,7 +266,8 @@
       font-weight: 400;
       color: var(--text-primary);
       white-space: nowrap;
-      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
     }
 
     .button-icons-play {
@@ -245,6 +276,7 @@
       gap: 12px;
       justify-content: center;
       flex: 1;
+      min-width: 0;
       border-radius: var(--radius-sm);
       padding: 4px 0;
     }
@@ -257,22 +289,38 @@
 
     .button-icons-play i:hover {
       transform: scale(1.15);
+      color: var(--accent);
     }
 
     .button-icons-play i.play-icon { color: var(--text-primary); }
     .button-icons-play i.pause-icon { color: var(--accent); }
     .button-icons-play i.stop-icon { color: var(--text-primary); }
+    .button-icons-play i.loop-icon { color: var(--text-primary); }
+    .button-icons-play i.loop-icon.active { color: var(--accent); }
+
+    .button-icons-play i.play-icon:hover,
+    .button-icons-play i.pause-icon:hover,
+    .button-icons-play i.stop-icon:hover,
+    .button-icons-play i.loop-icon:hover {
+      color: var(--accent);
+    }
 
     .controls-right {
       display: flex;
       justify-content: flex-end;
-      flex-shrink: 0;
+      flex: 1;
+      min-width: 0;
     }
 
     .controls-right i {
       font-size: 28px;
       color: var(--text-primary);
       cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .controls-right i:hover {
+      color: var(--accent);
     }
 
     /* ─── Music Section ─── */
@@ -334,6 +382,12 @@
       font-size: 22px;
       color: var(--text-primary);
       flex-shrink: 0;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+
+    .volume-control:hover i {
+      color: var(--accent);
     }
 
     .volume-bar {
@@ -375,6 +429,11 @@
       font-size: 22px;
       color: var(--text-primary);
       flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .music-button:hover i {
+      color: var(--accent);
     }
 
     .music-button span {
@@ -411,6 +470,40 @@
       gap: 8px;
       flex-shrink: 0;
       width: 200px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .take-card:active {
+      cursor: grabbing;
+    }
+
+    .take-card.dragging {
+      opacity: 0.4;
+      transform: scale(0.95);
+      cursor: grabbing;
+    }
+
+    .take-card.drag-gap-left {
+      transform: translateX(24px);
+    }
+
+    .take-card.drag-gap-right {
+      transform: translateX(-24px);
+    }
+
+    .take-card.drag-ghost {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.9;
+      transform: scale(1.04);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45), 0 0 0 2px var(--accent);
+      border-radius: var(--radius-lg);
+      transition: none;
+      cursor: grabbing;
     }
 
     .take-label {
@@ -449,10 +542,16 @@
 
     .take-label i:hover {
       transform: scale(1.15);
+      color: var(--accent);
     }
 
     .take-label i.icon-default { color: var(--text-primary); }
     .take-label i.icon-active { color: var(--accent); }
+
+    .take-label i.icon-default:hover,
+    .take-label i.icon-active:hover {
+      color: var(--accent);
+    }
 
     .take-body {
       border-radius: var(--radius-lg);
@@ -468,6 +567,11 @@
     .take-body.inputs {
       background: var(--bg-overlay);
       position: relative;
+      transition: box-shadow 0.25s ease;
+    }
+
+    .take-body.inputs.active-take {
+      box-shadow: inset 0 0 0 2px var(--accent);
     }
 
     .take-body.inputs::before {
@@ -709,6 +813,11 @@
     .add-take-icon i {
       font-size: 28px;
       color: var(--text-primary);
+      transition: color 0.2s;
+    }
+
+    .add-take-icon:hover i {
+      color: var(--accent);
     }
 
     .add-take-btn span {
@@ -793,6 +902,11 @@
     .create-take-btn-area i {
       font-size: 24px;
       color: var(--text-primary);
+      transition: color 0.2s;
+    }
+
+    .create-take-btn-area:hover i {
+      color: var(--accent);
     }
 
     .create-take-content > span {
@@ -805,10 +919,6 @@
 
     /* Mobile-first: max 480px */
     @media (max-width: 480px) {
-      .vertical-video-preview {
-        width: 80vw;
-        max-height: 45%;
-      }
       .right-side-menu {
         right: 8px;
         padding: 10px;
@@ -835,25 +945,11 @@
     }
 
     /* Larger phones 481-768 */
-    @media (min-width: 481px) and (max-width: 768px) {
-      .vertical-video-preview {
-        max-height: 50%;
-      }
-    }
 
     /* Tablet+ (show side by side if wanted) */
-    @media (min-width: 769px) {
-      .vertical-video-preview {
-        max-height: 65%;
-      }
-    }
 
     /* Landscape mode optimization */
     @media (max-height: 500px) {
-      .vertical-video-preview {
-        max-height: 35%;
-        width: 60vw;
-      }
       .editor-controls {
         gap: 8px;
         padding: 8px 0;
@@ -873,6 +969,50 @@
     }
     .take-tab-panel.active {
       display: block;
+    }
+
+    /* Dual dropzone (Start Frame + End Frame) */
+    .dual-dropzone-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .dual-dropzone-row .frame-slot {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .dual-dropzone-row .frame-slot-label {
+      order: 1;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(200,200,200,0.5);
+      text-align: center;
+      line-height: 1;
+    }
+
+    .dual-dropzone-row .media-dropzone {
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+
+    .dual-dropzone-row .dropzone-placeholder i {
+      font-size: 22px;
+    }
+
+    .dual-dropzone-row .dropzone-placeholder span {
+      font-size: 9px;
+    }
+
+    .dual-dropzone-row .dz-type-badge {
+      font-size: 8px !important;
+      padding: 1px 5px !important;
     }
 
     .media-dropzone {
@@ -1066,8 +1206,14 @@
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 3;
-      pointer-events: none;
+      z-index: 5;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .dz-video-play:hover {
+      background: rgba(237, 232, 221, 0.5);
     }
 
     .media-dropzone.has-media.is-video .dz-video-play {
@@ -1123,15 +1269,18 @@
             <div class="player-control">
               <div class="progress-bar-container">
                 <div class="progress-bar" id="progressBar">
-                  <div class="progress-bar-fill" id="progressFill"></div>
+                  <div class="progress-bar-fill" id="progressFill">
+                    <div class="progress-bar-thumb" id="progressThumb"></div>
+                  </div>
                 </div>
               </div>
               <div class="info-controls">
-                <div class="time-info">00:38/01:10</div>
+                <div class="time-info">00:00/00:00</div>
                 <div class="button-icons-play">
                   <i class="ph-fill ph-play play-icon" id="btnPlay"></i>
-                  <i class="ph-fill ph-pause pause-icon" id="btnPause"></i>
+                  <i class="ph-fill ph-pause pause-icon" id="btnPause" style="display:none"></i>
                   <i class="ph-fill ph-stop-circle stop-icon" id="btnStop"></i>
+                  <i class="ph ph-repeat loop-icon" id="btnLoop" title="Loop"></i>
                 </div>
                 <div class="controls-right">
                   <i class="ph ph-arrows-out" id="btnFullscreen" title="Tela cheia"></i>
@@ -1166,185 +1315,11 @@
           </div>
 
           <!-- Takes Horizontal Scroll -->
-          <div class="takes-scroll-wrapper">
+          <div class="takes-scroll-wrapper" style="display:none">
             <div class="takes-list" id="takesList">
 
-              <!-- Take 1 -->
-              <div class="take-card" data-active-tab="text">
-                <div class="take-label">
-                  <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
-                  <i class="ph ph-text-t icon-active" data-tab="text" title="Texto"></i>
-                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
-                  <i class="ph ph-sparkle icon-default" title="IA"></i>
-                </div>
-                <div class="take-body inputs">
-                  <div class="take-tab-panel active" data-panel="text">
-                    <textarea class="prompt-box">Ultra realistic 3D cinematic scene of a joyful stylized child with short reddish hair and freckles, eyes closed in peaceful happiness, sitting on top of a moss-covered rock.
-
-Golden hour sunset lighting with soft warm sunlight coming from behind, creating a strong glowing rim light around the hair and shoulders, gentle wind moving the hair naturally, tiny dust particles floating in the air illuminated by the sunlight.</textarea>
-                  </div>
-                  <div class="take-tab-panel" data-panel="image">
-                    <div class="media-dropzone" data-type="image">
-                      <input type="file" accept="image/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Imagem</span>
-                        <i class="ph ph-image"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <img class="dz-preview-img" alt="Preview">
-                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                  <div class="take-tab-panel" data-panel="video">
-                    <div class="media-dropzone" data-type="video">
-                      <input type="file" accept="video/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Vídeo</span>
-                        <i class="ph ph-video-camera"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <canvas class="dz-preview-video"></canvas>
-                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
-                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Take 2 -->
-              <div class="take-card" data-active-tab="image">
-                <div class="take-label">
-                  <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
-                  <i class="ph ph-text-t icon-default" data-tab="text" title="Texto"></i>
-                  <i class="ph ph-paperclip icon-active" data-tab="image" title="Imagem"></i>
-                  <i class="ph ph-sparkle icon-default" title="IA"></i>
-                </div>
-                <div class="take-body inputs">
-                  <div class="take-tab-panel" data-panel="text">
-                    <textarea class="prompt-box" placeholder="Descreva a cena..."></textarea>
-                  </div>
-                  <div class="take-tab-panel active" data-panel="image">
-                    <div class="media-dropzone" data-type="image">
-                      <input type="file" accept="image/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Imagem</span>
-                        <i class="ph ph-image"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <img class="dz-preview-img" alt="Preview">
-                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                  <div class="take-tab-panel" data-panel="video">
-                    <div class="media-dropzone" data-type="video">
-                      <input type="file" accept="video/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Vídeo</span>
-                        <i class="ph ph-video-camera"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <canvas class="dz-preview-video"></canvas>
-                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
-                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Take 3 -->
-              <div class="take-card" data-active-tab="video">
-                <div class="take-label">
-                  <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-active" data-tab="video" title="Vídeo"></i>
-                  <i class="ph ph-text-t icon-default" data-tab="text" title="Texto"></i>
-                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
-                  <i class="ph ph-sparkle icon-default" title="IA"></i>
-                </div>
-                <div class="take-body inputs">
-                  <div class="take-tab-panel" data-panel="text">
-                    <textarea class="prompt-box" placeholder="Descreva a cena..."></textarea>
-                  </div>
-                  <div class="take-tab-panel" data-panel="image">
-                    <div class="media-dropzone" data-type="image">
-                      <input type="file" accept="image/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Imagem</span>
-                        <i class="ph ph-image"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <img class="dz-preview-img" alt="Preview">
-                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                  <div class="take-tab-panel active" data-panel="video">
-                    <div class="media-dropzone" data-type="video">
-                      <input type="file" accept="video/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Vídeo</span>
-                        <i class="ph ph-video-camera"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <canvas class="dz-preview-video"></canvas>
-                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
-                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Take 4 -->
-              <div class="take-card" data-active-tab="text">
-                <div class="take-label">
-                  <div class="ta-duration">10s</div>
-                  <i class="ph ph-play icon-default" data-tab="video" title="Vídeo"></i>
-                  <i class="ph ph-text-t icon-active" data-tab="text" title="Texto"></i>
-                  <i class="ph ph-paperclip icon-default" data-tab="image" title="Imagem"></i>
-                  <i class="ph ph-sparkle icon-default" title="IA"></i>
-                </div>
-                <div class="take-body inputs">
-                  <div class="take-tab-panel active" data-panel="text">
-                    <textarea class="prompt-box">Continue with a cinematic slow push-in towards the child's face, bokeh background transition, golden particles floating upward.</textarea>
-                  </div>
-                  <div class="take-tab-panel" data-panel="image">
-                    <div class="media-dropzone" data-type="image">
-                      <input type="file" accept="image/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Imagem</span>
-                        <i class="ph ph-image"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <img class="dz-preview-img" alt="Preview">
-                      <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                  <div class="take-tab-panel" data-panel="video">
-                    <div class="media-dropzone" data-type="video">
-                      <input type="file" accept="video/*">
-                      <div class="dropzone-placeholder">
-                        <span class="dz-type-badge">Vídeo</span>
-                        <i class="ph ph-video-camera"></i>
-                        <span>Arraste ou clique<br>para anexar</span>
-                      </div>
-                      <canvas class="dz-preview-video"></canvas>
-                      <div class="dz-video-play"><i class="ph-fill ph-play"></i></div>
-                      <div class="dz-media-overlay"><i class="ph ph-film-strip"></i><span class="dz-filename"></span></div>
-                      <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Add Take button -->
-              <div class="add-take-card">
+              <!-- Add Take button (hidden when no takes) -->
+              <div class="add-take-card" style="display:none">
                 <div class="add-take-inner">
                   <div class="add-take-btn" id="addTakeBtn">
                     <div class="add-take-icon">
@@ -1380,56 +1355,373 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
 </div><!-- editor-page -->
 
 <script>
-  // ═══════════════════════════ Interactive Behaviors ═══════════════════════════
+  // ═══════════════════════════ Sequential Video Playback System ═══════════════════════════
 
-  // Progress bar click-to-seek
+  // Global state
+  let currentPreviewVideo = null;
+  let isLooping = false;
+  let isDragging = false;
+  let takeCounter = 0;
+  const takesQuery = [];
+
+  // Sequential playlist state
+  // Each entry: { file, duration, objectURL, takeCard }
+  let videoPlaylist = [];
+  let totalDuration = 0;
+  let currentPlaylistIndex = -1;
+  let isSequentialPlaying = false;
+  let globalTimeOffset = 0; // accumulated time of previous clips
+
+  // DOM refs
   const progressBar = document.getElementById('progressBar');
   const progressFill = document.getElementById('progressFill');
+  const progressThumb = document.getElementById('progressThumb');
+  const btnPlay = document.getElementById('btnPlay');
+  const btnPause = document.getElementById('btnPause');
+  const btnStop = document.getElementById('btnStop');
+  const btnLoop = document.getElementById('btnLoop');
+  const timeInfoEl = document.querySelector('.time-info');
+  const videoPreview = document.getElementById('videoPreview');
+  const alertEl = videoPreview.querySelector('.alert-joining');
 
-  progressBar.addEventListener('click', (e) => {
-    const rect = progressBar.getBoundingClientRect();
-    const pct = ((e.clientX - rect.left) / rect.width) * 100;
-    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
-    updateTimeDisplay(pct);
-  });
-
-  // Touch drag on progress bar
-  let isDragging = false;
-  progressBar.addEventListener('touchstart', (e) => { isDragging = true; }, { passive: true });
-  progressBar.addEventListener('touchmove', (e) => {
-    if (!isDragging) return;
-    const rect = progressBar.getBoundingClientRect();
-    const touch = e.touches[0];
-    const pct = ((touch.clientX - rect.left) / rect.width) * 100;
-    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
-    updateTimeDisplay(pct);
-  }, { passive: true });
-  progressBar.addEventListener('touchend', () => { isDragging = false; });
-
-  function updateTimeDisplay(pct) {
-    const totalSec = 70; // 01:10
-    const currentSec = Math.round((pct / 100) * totalSec);
-    const min = String(Math.floor(currentSec / 60)).padStart(2, '0');
-    const sec = String(currentSec % 60).padStart(2, '0');
-    document.querySelector('.time-info').textContent = `${min}:${sec}/01:10`;
+  // ═══ Utility ═══
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
   }
 
-  // Play/Pause/Stop
-  document.getElementById('btnPlay').addEventListener('click', () => {
-    document.querySelector('.alert-joining span').textContent = '▶ Reproduzindo...';
+  // ═══ Playlist Management ═══
+
+  function rebuildPlaylist() {
+    // Clean up old object URLs
+    videoPlaylist.forEach(entry => {
+      if (entry.objectURL) URL.revokeObjectURL(entry.objectURL);
+    });
+    videoPlaylist = [];
+    totalDuration = 0;
+
+    const cards = document.querySelectorAll('.take-card');
+    const pendingEntries = [];
+
+    cards.forEach(card => {
+      const videoDz = card.querySelector('.media-dropzone[data-type="video"]');
+      if (videoDz && videoDz._videoFile && videoDz._videoDuration) {
+        const entry = {
+          file: videoDz._videoFile,
+          duration: videoDz._videoDuration,
+          objectURL: null,
+          takeCard: card
+        };
+        pendingEntries.push(entry);
+        totalDuration += entry.duration;
+      }
+    });
+
+    videoPlaylist = pendingEntries;
+    updateTimeDisplay();
+    updateTakeDurations();
+  }
+
+  function updateTakeDurations() {
+    videoPlaylist.forEach(entry => {
+      const durEl = entry.takeCard.querySelector('.ta-duration');
+      if (durEl) {
+        durEl.textContent = Math.round(entry.duration) + 's';
+      }
+    });
+  }
+
+  function updateTimeDisplay() {
+    if (totalDuration <= 0) {
+      timeInfoEl.textContent = '00:00/00:00';
+      progressFill.style.width = '0%';
+      return;
+    }
+    const currentGlobal = getCurrentGlobalTime();
+    const pct = (currentGlobal / totalDuration) * 100;
+    progressFill.style.width = Math.min(100, pct) + '%';
+    timeInfoEl.textContent = formatTime(currentGlobal) + '/' + formatTime(totalDuration);
+  }
+
+  function getCurrentGlobalTime() {
+    if (currentPlaylistIndex < 0 || !currentPreviewVideo) {
+      return globalTimeOffset;
+    }
+    return globalTimeOffset + (currentPreviewVideo.currentTime || 0);
+  }
+
+  function getOffsetForIndex(idx) {
+    let offset = 0;
+    for (let i = 0; i < idx && i < videoPlaylist.length; i++) {
+      offset += videoPlaylist[i].duration;
+    }
+    return offset;
+  }
+
+  // ═══ Preview Video Management ═══
+
+  function loadVideoInPreview(playlistIndex, autoplay, startTime) {
+    if (playlistIndex < 0 || playlistIndex >= videoPlaylist.length) return;
+
+    // Clean up existing
+    cleanupPreviewVideo();
+
+    const entry = videoPlaylist[playlistIndex];
+    currentPlaylistIndex = playlistIndex;
+    globalTimeOffset = getOffsetForIndex(playlistIndex);
+
+    const objURL = URL.createObjectURL(entry.file);
+    entry.objectURL = objURL;
+
+    const videoEl = document.createElement('video');
+    videoEl.src = objURL;
+    videoEl.playsInline = true;
+    videoEl.preload = 'auto';
+    videoEl.style.cssText = 'width:100%;height:100%;object-fit:contain;border-radius:var(--radius-xl);position:absolute;inset:0;z-index:2;background:#000;';
+
+    currentPreviewVideo = videoEl;
+    if (alertEl) alertEl.style.display = 'none';
+
+    // Highlight active take
+    highlightActiveTake(playlistIndex);
+
+    videoEl.addEventListener('loadedmetadata', () => {
+      if (startTime && startTime > 0) {
+        videoEl.currentTime = startTime;
+      }
+      if (autoplay) {
+        videoEl.play().catch(() => {});
+      }
+    });
+
+    videoEl.addEventListener('play', () => {
+      btnPlay.style.display = 'none';
+      btnPause.style.display = '';
+      isSequentialPlaying = true;
+    });
+
+    videoEl.addEventListener('pause', () => {
+      if (!videoEl._endingNaturally) {
+        btnPlay.style.display = '';
+        btnPause.style.display = 'none';
+      }
+    });
+
+    videoEl.addEventListener('timeupdate', () => {
+      if (!isDragging) {
+        updateTimeDisplay();
+      }
+    });
+
+    videoEl.addEventListener('ended', () => {
+      videoEl._endingNaturally = true;
+      // Move to next in playlist
+      const nextIndex = currentPlaylistIndex + 1;
+      if (nextIndex < videoPlaylist.length) {
+        loadVideoInPreview(nextIndex, true, 0);
+      } else {
+        // Playlist finished
+        if (isLooping && videoPlaylist.length > 0) {
+          loadVideoInPreview(0, true, 0);
+        } else {
+          isSequentialPlaying = false;
+          btnPlay.style.display = '';
+          btnPause.style.display = 'none';
+          progressFill.style.width = '100%';
+          globalTimeOffset = totalDuration;
+          currentPlaylistIndex = -1;
+          updateTimeDisplay();
+          // Reset to beginning state
+          setTimeout(() => {
+            progressFill.style.width = '0%';
+            globalTimeOffset = 0;
+            updateTimeDisplay();
+          }, 1000);
+        }
+      }
+    });
+
+    videoPreview.appendChild(videoEl);
+  }
+
+  function cleanupPreviewVideo() {
+    if (currentPreviewVideo) {
+      currentPreviewVideo.pause();
+      currentPreviewVideo._endingNaturally = true;
+      if (currentPreviewVideo.src) {
+        // Don't revoke here; managed by playlist
+      }
+      currentPreviewVideo.remove();
+      currentPreviewVideo = null;
+    }
+  }
+
+  function loadFirstVideoAsPreview(file) {
+    // Called when first video is added — load paused at frame 0
+    rebuildPlaylist();
+    if (videoPlaylist.length > 0) {
+      loadVideoInPreview(0, false, 0);
+    }
+  }
+
+  function highlightActiveTake(idx) {
+    document.querySelectorAll('.take-body.inputs.active-take').forEach(b => {
+      b.classList.remove('active-take');
+    });
+    if (idx >= 0 && idx < videoPlaylist.length) {
+      const body = videoPlaylist[idx].takeCard.querySelector('.take-body.inputs');
+      if (body) {
+        body.classList.add('active-take');
+      }
+      videoPlaylist[idx].takeCard.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    }
+  }
+
+  // ═══ Progress Bar ═══
+
+  function seekToGlobalTime(globalTime) {
+    globalTime = Math.max(0, Math.min(totalDuration, globalTime));
+    // Find which clip this time falls in
+    let accumulated = 0;
+    for (let i = 0; i < videoPlaylist.length; i++) {
+      if (globalTime <= accumulated + videoPlaylist[i].duration) {
+        const localTime = globalTime - accumulated;
+        const wasPlaying = isSequentialPlaying;
+        loadVideoInPreview(i, wasPlaying, localTime);
+        return;
+      }
+      accumulated += videoPlaylist[i].duration;
+    }
+    // Past the end
+    if (videoPlaylist.length > 0) {
+      const lastIdx = videoPlaylist.length - 1;
+      loadVideoInPreview(lastIdx, false, videoPlaylist[lastIdx].duration);
+    }
+  }
+
+  function seekToPercent(pct) {
+    pct = Math.max(0, Math.min(100, pct));
+    if (totalDuration > 0) {
+      const targetTime = (pct / 100) * totalDuration;
+      seekToGlobalTime(targetTime);
+    }
+    progressFill.style.width = pct + '%';
+  }
+
+  function getPctFromEvent(e) {
+    const rect = progressBar.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return ((clientX - rect.left) / rect.width) * 100;
+  }
+
+  progressBar.addEventListener('click', (e) => {
+    if (e.target === progressThumb) return;
+    seekToPercent(getPctFromEvent(e));
   });
 
-  document.getElementById('btnPause').addEventListener('click', () => {
-    document.querySelector('.alert-joining span').textContent = '⏸ Pausado';
+  // Mouse drag
+  progressThumb.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    isDragging = true;
+    progressBar.classList.add('dragging');
+    progressThumb.classList.add('dragging');
   });
 
-  document.getElementById('btnStop').addEventListener('click', () => {
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    const pct = getPctFromEvent(e);
+    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    // Update time display while dragging
+    if (totalDuration > 0) {
+      const targetTime = (Math.max(0, Math.min(100, pct)) / 100) * totalDuration;
+      timeInfoEl.textContent = formatTime(targetTime) + '/' + formatTime(totalDuration);
+    }
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    if (isDragging) {
+      isDragging = false;
+      progressBar.classList.remove('dragging');
+      progressThumb.classList.remove('dragging');
+      seekToPercent(getPctFromEvent(e));
+    }
+  });
+
+  // Touch drag
+  progressThumb.addEventListener('touchstart', () => {
+    isDragging = true;
+    progressBar.classList.add('dragging');
+    progressThumb.classList.add('dragging');
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    const pct = getPctFromEvent(e);
+    progressFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    if (totalDuration > 0) {
+      const targetTime = (Math.max(0, Math.min(100, pct)) / 100) * totalDuration;
+      timeInfoEl.textContent = formatTime(targetTime) + '/' + formatTime(totalDuration);
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    if (isDragging) {
+      isDragging = false;
+      progressBar.classList.remove('dragging');
+      progressThumb.classList.remove('dragging');
+      // Seek to last known position
+      const fillWidth = parseFloat(progressFill.style.width) || 0;
+      seekToPercent(fillWidth);
+    }
+  });
+
+  // ═══ Play/Pause/Stop/Loop Buttons ═══
+
+  btnPlay.addEventListener('click', () => {
+    if (videoPlaylist.length === 0) return;
+    if (currentPreviewVideo) {
+      currentPreviewVideo.play().catch(() => {});
+    } else {
+      // Start from beginning
+      loadVideoInPreview(0, true, 0);
+    }
+  });
+
+  btnPause.addEventListener('click', () => {
+    if (currentPreviewVideo) {
+      isSequentialPlaying = false;
+      currentPreviewVideo.pause();
+    }
+  });
+
+  btnStop.addEventListener('click', () => {
+    isSequentialPlaying = false;
+    cleanupPreviewVideo();
+    currentPlaylistIndex = -1;
+    globalTimeOffset = 0;
     progressFill.style.width = '0%';
-    document.querySelector('.time-info').textContent = '00:00/01:10';
-    document.querySelector('.alert-joining span').textContent = '⏹ Parado';
+    btnPlay.style.display = '';
+    btnPause.style.display = 'none';
+    updateTimeDisplay();
+    document.querySelectorAll('.take-body.inputs.active-take').forEach(b => {
+      b.classList.remove('active-take');
+    });
+    // Reload first video paused if available
+    if (videoPlaylist.length > 0) {
+      loadVideoInPreview(0, false, 0);
+    } else {
+      if (alertEl) alertEl.style.display = '';
+    }
   });
 
-  // Right side menu toggle
+  btnLoop.addEventListener('click', () => {
+    isLooping = !isLooping;
+    btnLoop.classList.toggle('active', isLooping);
+  });
+
+  // ═══ Right side menu / Fullscreen ═══
+
   document.querySelectorAll('.right-side-menu i').forEach(icon => {
     icon.addEventListener('click', () => {
       document.querySelectorAll('.right-side-menu i').forEach(i => i.classList.remove('active'));
@@ -1437,23 +1729,77 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
     });
   });
 
-  // Fullscreen toggle
   document.getElementById('btnFullscreen').addEventListener('click', () => {
-    const preview = document.getElementById('videoPreview');
     if (!document.fullscreenElement) {
-      preview.requestFullscreen?.() || preview.webkitRequestFullscreen?.();
+      videoPreview.requestFullscreen?.() || videoPreview.webkitRequestFullscreen?.();
     } else {
       document.exitFullscreen?.() || document.webkitExitFullscreen?.();
     }
   });
 
+  // ═══════════════════════════ Takes Query Data ═══════════════════════════
+
+  function getTakesQuery() {
+    const cards = document.querySelectorAll('.take-card');
+    const query = [];
+    cards.forEach((card) => {
+      query.push(collectTakeData(card));
+    });
+    return query;
+  }
+
+  function collectTakeData(card) {
+    const prompt = card.querySelector('.prompt-box')?.value || '';
+    const imagePanel = card.querySelector('[data-panel="image"]');
+    const singleDz = imagePanel?.querySelector(':scope > .media-dropzone[data-type="image"]');
+    const singleImg = singleDz?.classList.contains('has-media')
+      ? singleDz.querySelector('.dz-preview-img')?.src || '' : '';
+
+    const dualRow = imagePanel?.querySelector('.dual-dropzone-row');
+    const frameSlots = dualRow?.querySelectorAll('.frame-slot') || [];
+    let startFrameImg = '', endFrameImg = '';
+    if (frameSlots.length >= 2) {
+      const startDz = frameSlots[0].querySelector('.media-dropzone');
+      const endDz = frameSlots[1].querySelector('.media-dropzone');
+      startFrameImg = startDz?.classList.contains('has-media')
+        ? startDz.querySelector('.dz-preview-img')?.src || '' : '';
+      endFrameImg = endDz?.classList.contains('has-media')
+        ? endDz.querySelector('.dz-preview-img')?.src || '' : '';
+    }
+
+    const isDualMode = dualRow && dualRow.style.display !== 'none';
+    let imageAttached = '', imageStartFrame = '', imageEndFrame = '';
+    if (isDualMode) {
+      imageStartFrame = startFrameImg;
+      imageEndFrame = endFrameImg;
+    } else {
+      imageAttached = singleImg;
+    }
+
+    const videoDz = card.querySelector('.media-dropzone[data-type="video"]');
+    const videoAttached = videoDz?.classList.contains('has-media') ? 'attached' : '';
+    const durationText = card.querySelector('.ta-duration')?.textContent || '10s';
+    const duration = parseInt(durationText) || 10;
+
+    return {
+      "image_attached": imageAttached,
+      "image_start_frame": imageStartFrame,
+      "image_end_frame": imageEndFrame,
+      "video_attached": videoAttached,
+      "prompt": prompt,
+      "model": "grok-imagine-video",
+      "duration": duration,
+      "aspect_ratio": "9:16",
+      "resolution": "720p"
+    };
+  }
+
   // ═══ Dropzone Logic ═══
 
   function initDropzone(dz) {
     const input = dz.querySelector('input[type="file"]');
-    const type = dz.dataset.type; // 'image' or 'video'
+    const type = dz.dataset.type;
 
-    // Drag events
     dz.addEventListener('dragover', (e) => {
       e.preventDefault();
       dz.classList.add('drag-over');
@@ -1466,18 +1812,35 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
       if (file) handleMediaFile(dz, file, type);
     });
 
-    // Click-to-browse (handled by file input overlay, but also manual)
     input.addEventListener('change', () => {
       if (input.files[0]) handleMediaFile(dz, input.files[0], type);
     });
 
-    // Remove button
     const removeBtn = dz.querySelector('.dz-remove-btn');
     if (removeBtn) {
       removeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         clearDropzone(dz, type);
       });
+    }
+
+    // Video play button — jump to this clip in the sequential playlist and play
+    if (type === 'video') {
+      const playBtn = dz.querySelector('.dz-video-play');
+      if (playBtn) {
+        playBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (dz._videoFile) {
+            // Find this clip's index in the playlist
+            const card = dz.closest('.take-card');
+            const idx = videoPlaylist.findIndex(entry => entry.takeCard === card);
+            if (idx >= 0) {
+              loadVideoInPreview(idx, true, 0);
+            }
+          }
+        });
+      }
     }
   }
 
@@ -1491,6 +1854,7 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
         const img = dz.querySelector('.dz-preview-img');
         img.src = ev.target.result;
         dz.classList.add('has-media');
+        console.log('Takes query:', JSON.stringify(getTakesQuery(), null, 2));
       };
       reader.readAsDataURL(file);
     } else if (type === 'video') {
@@ -1499,9 +1863,13 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
       video.src = url;
       video.muted = true;
       video.preload = 'metadata';
-      video.addEventListener('loadeddata', () => {
+
+      video.addEventListener('loadedmetadata', () => {
+        // Store real duration
+        dz._videoDuration = video.duration;
         video.currentTime = 0.5;
       });
+
       video.addEventListener('seeked', () => {
         const canvas = dz.querySelector('.dz-preview-video');
         canvas.width = video.videoWidth || 200;
@@ -1510,8 +1878,30 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         URL.revokeObjectURL(url);
         dz.classList.add('has-media', 'is-video');
+        dz._videoFile = file;
+
+        // Update ta-duration with real duration
+        const card = dz.closest('.take-card');
+        const durEl = card?.querySelector('.ta-duration');
+        if (durEl && dz._videoDuration) {
+          durEl.textContent = Math.round(dz._videoDuration) + 's';
+        }
+
+        // Rebuild playlist and check if this is the first video
+        const hadVideos = videoPlaylist.length > 0;
+        rebuildPlaylist();
+
+        // Auto-load first video in preview (paused) when first clip is added
+        if (!hadVideos && videoPlaylist.length > 0) {
+          loadVideoInPreview(0, false, 0);
+        } else if (videoPlaylist.length > 0 && !isSequentialPlaying) {
+          // Update time display for new total
+          updateTimeDisplay();
+        }
+
+        console.log('Takes query:', JSON.stringify(getTakesQuery(), null, 2));
       });
-      // Fallback if seeked doesn't fire
+
       video.addEventListener('error', () => {
         dz.classList.add('has-media', 'is-video');
       });
@@ -1531,13 +1921,31 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+      delete dz.dataset.videoSrc;
+      delete dz._videoFile;
+      delete dz._videoDuration;
+
+      // Rebuild playlist after removal
+      rebuildPlaylist();
+      // If no more videos, cleanup preview
+      if (videoPlaylist.length === 0) {
+        cleanupPreviewVideo();
+        currentPlaylistIndex = -1;
+        globalTimeOffset = 0;
+        btnPlay.style.display = '';
+        btnPause.style.display = 'none';
+        if (alertEl) alertEl.style.display = '';
+        document.querySelectorAll('.take-body.inputs.active-take').forEach(b => {
+          b.classList.remove('active-take');
+        });
+      } else if (!isSequentialPlaying) {
+        loadVideoInPreview(0, false, 0);
+      }
     }
     const filenameEl = dz.querySelector('.dz-filename');
     if (filenameEl) filenameEl.textContent = '';
+    console.log('Takes query:', JSON.stringify(getTakesQuery(), null, 2));
   }
-
-  // Init all existing dropzones
-  document.querySelectorAll('.media-dropzone').forEach(dz => initDropzone(dz));
 
   // ═══ Take Label Tab Switching ═══
 
@@ -1545,33 +1953,30 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
     const tabIcons = card.querySelectorAll('.take-label i[data-tab]');
     tabIcons.forEach(icon => {
       icon.addEventListener('click', () => {
-        const tab = icon.dataset.tab;
-        switchTakeTab(card, tab);
+        switchTakeTab(card, icon.dataset.tab);
       });
     });
   }
 
   function switchTakeTab(card, tab) {
-    // Update icon states
     card.querySelectorAll('.take-label i[data-tab]').forEach(i => {
       i.classList.toggle('icon-active', i.dataset.tab === tab);
       i.classList.toggle('icon-default', i.dataset.tab !== tab);
     });
-    // Update panels
     card.querySelectorAll('.take-tab-panel').forEach(panel => {
       panel.classList.toggle('active', panel.dataset.panel === tab);
     });
     card.dataset.activeTab = tab;
   }
 
-  // Init tabs for all existing cards
-  document.querySelectorAll('.take-card').forEach(card => initTakeCardTabs(card));
+  // ═══ Create Take Card ═══
 
-  // ═══ Add take button ═══
   function createTakeCard() {
+    takeCounter++;
     const card = document.createElement('div');
     card.className = 'take-card';
     card.dataset.activeTab = 'text';
+    card.dataset.takeIndex = takeCounter;
     card.style.animation = 'fadeIn 0.3s ease';
 
     card.innerHTML = `
@@ -1598,6 +2003,36 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
             <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
             <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
           </div>
+          <div class="dual-dropzone-row" style="display:none">
+            <div class="frame-slot">
+              <span class="frame-slot-label">Start Frame</span>
+              <div class="media-dropzone" data-type="image">
+                <input type="file" accept="image/*">
+                <div class="dropzone-placeholder">
+                  <span class="dz-type-badge">Imagem</span>
+                  <i class="ph ph-image"></i>
+                  <span>Arraste ou clique</span>
+                </div>
+                <img class="dz-preview-img" alt="Preview">
+                <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+              </div>
+            </div>
+            <div class="frame-slot">
+              <span class="frame-slot-label">End Frame</span>
+              <div class="media-dropzone" data-type="image">
+                <input type="file" accept="image/*">
+                <div class="dropzone-placeholder">
+                  <span class="dz-type-badge">Imagem</span>
+                  <i class="ph ph-image"></i>
+                  <span>Arraste ou clique</span>
+                </div>
+                <img class="dz-preview-img" alt="Preview">
+                <div class="dz-media-overlay"><i class="ph ph-image"></i><span class="dz-filename"></span></div>
+                <div class="dz-remove-btn" title="Remover"><i class="ph ph-x"></i></div>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="take-tab-panel" data-panel="video">
           <div class="media-dropzone" data-type="video">
@@ -1616,24 +2051,277 @@ Golden hour sunset lighting with soft warm sunlight coming from behind, creating
       </div>
     `;
 
+    const promptBox = card.querySelector('.prompt-box');
+    promptBox.addEventListener('input', () => {
+      console.log('Takes query:', JSON.stringify(getTakesQuery(), null, 2));
+    });
+
     card.querySelectorAll('.media-dropzone').forEach(dz => initDropzone(dz));
     initTakeCardTabs(card);
-
     return card;
   }
 
-  document.getElementById('addTakeBtn').addEventListener('click', () => {
+  // ═══ Add take buttons ═══
+
+  function updateTakesVisibility() {
+    const takesList = document.getElementById('takesList');
+    const hasTakes = takesList.querySelectorAll('.take-card').length > 0;
+    const addCard = takesList.querySelector('.add-take-card');
+    const createWrapper = document.querySelector('.create-take-wrapper');
+    const scrollWrapper = document.querySelector('.takes-scroll-wrapper');
+
+    scrollWrapper.style.display = hasTakes ? '' : 'none';
+    addCard.style.display = hasTakes ? '' : 'none';
+    createWrapper.style.display = hasTakes ? 'none' : '';
+  }
+
+  function addNewTake() {
     const takesList = document.getElementById('takesList');
     const addCard = takesList.querySelector('.add-take-card');
     const newTake = createTakeCard();
     takesList.insertBefore(newTake, addCard);
+    updateTakesVisibility();
     newTake.scrollIntoView({ behavior: 'smooth', inline: 'end' });
-  });
+    console.log('Takes query:', JSON.stringify(getTakesQuery(), null, 2));
+  }
 
-  // Create take button (bottom)
-  document.getElementById('createTakeBtn').addEventListener('click', () => {
-    document.getElementById('addTakeBtn').click();
-  });
+  document.getElementById('addTakeBtn').addEventListener('click', addNewTake);
+  document.getElementById('createTakeBtn').addEventListener('click', addNewTake);
+
+  // Initial state
+  updateTakesVisibility();
+  updateTimeDisplay();
+
+  // ═══════════════════════════ Drag & Drop Reorder Takes ═══════════════════════════
+
+  (function initTakesDragAndDrop() {
+    const takesList = document.getElementById('takesList');
+    let dragState = null; // { card, ghost, startX, startY, offsetX, offsetY, originalIndex }
+
+    function getTakeCards() {
+      return Array.from(takesList.querySelectorAll('.take-card'));
+    }
+
+    function getCardIndex(card) {
+      return getTakeCards().indexOf(card);
+    }
+
+    function createGhost(card, clientX, clientY) {
+      const rect = card.getBoundingClientRect();
+      const ghost = card.cloneNode(true);
+      ghost.classList.add('drag-ghost');
+      ghost.style.width = rect.width + 'px';
+      ghost.style.height = rect.height + 'px';
+      ghost.style.left = rect.left + 'px';
+      ghost.style.top = rect.top + 'px';
+      document.body.appendChild(ghost);
+      return {
+        el: ghost,
+        offsetX: clientX - rect.left,
+        offsetY: clientY - rect.top
+      };
+    }
+
+    function moveGhost(ghost, clientX, clientY) {
+      ghost.el.style.left = (clientX - ghost.offsetX) + 'px';
+      ghost.el.style.top = (clientY - ghost.offsetY) + 'px';
+    }
+
+    function removeGhost() {
+      if (dragState && dragState.ghost) {
+        dragState.ghost.el.remove();
+      }
+    }
+
+    function clearGapClasses() {
+      getTakeCards().forEach(c => {
+        c.classList.remove('drag-gap-left', 'drag-gap-right');
+      });
+    }
+
+    function getDropIndex(clientX) {
+      const cards = getTakeCards().filter(c => c !== dragState.card);
+      if (cards.length === 0) return 0;
+
+      for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        if (clientX < midX) {
+          return getCardIndex(cards[i]);
+        }
+      }
+      // Past the last card
+      return getCardIndex(cards[cards.length - 1]) + 1;
+    }
+
+    function updateGapIndicators(clientX) {
+      clearGapClasses();
+      if (!dragState) return;
+
+      const cards = getTakeCards().filter(c => c !== dragState.card);
+      if (cards.length === 0) return;
+
+      // Find which gap the cursor is in
+      for (let i = 0; i < cards.length; i++) {
+        const rect = cards[i].getBoundingClientRect();
+        const midX = rect.left + rect.width / 2;
+        if (clientX < midX) {
+          // Cursor is before card[i] — open gap before it
+          cards[i].classList.add('drag-gap-left');
+          if (i > 0) cards[i - 1].classList.add('drag-gap-right');
+          return;
+        }
+      }
+      // Cursor is past the last card — open gap after last
+      cards[cards.length - 1].classList.add('drag-gap-right');
+    }
+
+    function finalizeDrop(clientX) {
+      const addCard = takesList.querySelector('.add-take-card');
+      const dropIdx = getDropIndex(clientX);
+      const cards = getTakeCards();
+      const currentIdx = cards.indexOf(dragState.card);
+
+      // Only move if position actually changed
+      if (dropIdx !== currentIdx && dropIdx !== currentIdx + 1) {
+        // Remove card from current position
+        dragState.card.remove();
+
+        // Recalculate targets after removal
+        const remainingCards = getTakeCards();
+        const adjustedIdx = dropIdx > currentIdx ? dropIdx - 1 : dropIdx;
+
+        if (adjustedIdx >= remainingCards.length) {
+          takesList.insertBefore(dragState.card, addCard);
+        } else {
+          takesList.insertBefore(dragState.card, remainingCards[adjustedIdx]);
+        }
+
+        // Rebuild video playlist after reorder
+        rebuildPlaylist();
+      }
+    }
+
+    // ─── Pointer Events (unified mouse + touch) ───
+
+    let longPressTimer = null;
+    let pendingStart = null;
+    const LONG_PRESS_MS = 180;
+    const DRAG_THRESHOLD = 6;
+
+    function onPointerDown(e) {
+      const card = e.target.closest('.take-card');
+      if (!card) return;
+
+      // Don't interfere with interactive elements
+      const interactive = e.target.closest('textarea, input, .dz-remove-btn, .dz-video-play, .take-label i, .media-dropzone input[type="file"]');
+      if (interactive) return;
+
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      pendingStart = { card, clientX, clientY };
+
+      // For touch: use long press to initiate drag (avoid conflicting with scroll)
+      if (e.touches) {
+        longPressTimer = setTimeout(() => {
+          startDrag(pendingStart.card, pendingStart.clientX, pendingStart.clientY);
+          pendingStart = null;
+        }, LONG_PRESS_MS);
+      }
+    }
+
+    function startDrag(card, clientX, clientY) {
+      const ghost = createGhost(card, clientX, clientY);
+      dragState = {
+        card,
+        ghost,
+        originalIndex: getCardIndex(card)
+      };
+      card.classList.add('dragging');
+
+      // Prevent text selection globally during drag
+      document.body.style.userSelect = 'none';
+      document.body.style.webkitUserSelect = 'none';
+    }
+
+    function onPointerMove(e) {
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      // If we haven't started dragging yet (mouse), check threshold
+      if (pendingStart && !dragState && !e.touches) {
+        const dx = clientX - pendingStart.clientX;
+        const dy = clientY - pendingStart.clientY;
+        if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+          startDrag(pendingStart.card, pendingStart.clientX, pendingStart.clientY);
+          pendingStart = null;
+        }
+        return;
+      }
+
+      // Cancel long press if finger moves too much
+      if (pendingStart && e.touches && longPressTimer) {
+        const dx = clientX - pendingStart.clientX;
+        const dy = clientY - pendingStart.clientY;
+        if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+          pendingStart = null;
+          return;
+        }
+      }
+
+      if (!dragState) return;
+      if (e.cancelable) e.preventDefault();
+
+      moveGhost(dragState.ghost, clientX, clientY);
+      updateGapIndicators(clientX);
+
+      // Auto-scroll the takes list when dragging near edges
+      const listRect = takesList.getBoundingClientRect();
+      const edgeZone = 40;
+      if (clientX < listRect.left + edgeZone) {
+        takesList.scrollBy({ left: -12 });
+      } else if (clientX > listRect.right - edgeZone) {
+        takesList.scrollBy({ left: 12 });
+      }
+    }
+
+    function onPointerUp(e) {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+      pendingStart = null;
+
+      if (!dragState) return;
+
+      const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+
+      finalizeDrop(clientX);
+
+      dragState.card.classList.remove('dragging');
+      removeGhost();
+      clearGapClasses();
+
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
+
+      dragState = null;
+    }
+
+    // Mouse events
+    takesList.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('mousemove', onPointerMove);
+    document.addEventListener('mouseup', onPointerUp);
+
+    // Touch events
+    takesList.addEventListener('touchstart', onPointerDown, { passive: true });
+    document.addEventListener('touchmove', onPointerMove, { passive: false });
+    document.addEventListener('touchend', onPointerUp);
+    document.addEventListener('touchcancel', onPointerUp);
+  })();
 </script>
 
 </body>
